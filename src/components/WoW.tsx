@@ -140,6 +140,27 @@ function compress(file: File): Promise<string> {
   });
 }
 
+/* ── Checkpoint component (outside WoW to avoid re-creation) ── */
+const CK = ({ label, link, val, setVal, tx, setTx, ph }: {
+  label: string; link?: string; val: boolean | null; setVal: (v: boolean) => void;
+  tx: string; setTx: (v: string) => void; ph?: string;
+}) => (
+  <div style={{ marginBottom: 8, padding: "10px 12px", background: val === false ? "#fdf0ee" : val === true ? "#ebf5f0" : "#f9f8f6", border: "1px solid " + (val === false ? "#9E3D2B30" : val === true ? "#2A6B5030" : "#e8e4df"), transition: "all .2s" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: val !== null ? 6 : 0 }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.3 }}>{label}</div>
+        {link && <a href={link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "#1A3A8F", textDecoration: "none", ...M }}>Abrir →</a>}
+      </div>
+      <div style={{ display: "flex", gap: 3 }}>
+        {[true, false].map((v) => (
+          <div key={String(v)} onClick={() => setVal(v)} style={{ padding: "4px 10px", fontSize: 10, fontWeight: 600, cursor: "pointer", background: val === v ? (v ? "#2A6B50" : "#9E3D2B") : "transparent", color: val === v ? "#fff" : "#aaa", border: "1px solid " + (val === v ? (v ? "#2A6B50" : "#9E3D2B") : "#ddd") }}>{v ? "Sim" : "Não"}</div>
+        ))}
+      </div>
+    </div>
+    {val !== null && <textarea value={tx} onChange={(e) => setTx(e.target.value)} placeholder={ph || (val ? "Considerações..." : "Por quê não?")} rows={2} style={{ ...I, fontSize: 11, marginTop: 4, resize: "vertical" as const, background: val ? "#f9fdf9" : "#fefafa" }} />}
+  </div>
+);
+
 /* ════════════════════════════════════════════════════
    COMPONENT
 ════════════════════════════════════════════════════ */
@@ -229,27 +250,6 @@ export default function WoW() {
 
   const tog = (id: string) => setExp((p) => (p === id ? null : id));
 
-  /* ── Checkpoint component ── */
-  const CK = ({ label, link, val, setVal, tx, setTx, ph }: {
-    label: string; link?: string; val: boolean | null; setVal: (v: boolean) => void;
-    tx: string; setTx: (v: string) => void; ph?: string;
-  }) => (
-    <div style={{ marginBottom: 8, padding: "10px 12px", background: val === false ? "#fdf0ee" : val === true ? "#ebf5f0" : "#f9f8f6", border: "1px solid " + (val === false ? "#9E3D2B30" : val === true ? "#2A6B5030" : "#e8e4df"), transition: "all .2s" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: val !== null ? 6 : 0 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.3 }}>{label}</div>
-          {link && <a href={link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "#1A3A8F", textDecoration: "none", ...M }}>Abrir →</a>}
-        </div>
-        <div style={{ display: "flex", gap: 3 }}>
-          {[true, false].map((v) => (
-            <div key={String(v)} onClick={() => setVal(v)} style={{ padding: "4px 10px", fontSize: 10, fontWeight: 600, cursor: "pointer", background: val === v ? (v ? "#2A6B50" : "#9E3D2B") : "transparent", color: val === v ? "#fff" : "#aaa", border: "1px solid " + (val === v ? (v ? "#2A6B50" : "#9E3D2B") : "#ddd") }}>{v ? "Sim" : "Não"}</div>
-          ))}
-        </div>
-      </div>
-      {val !== null && <textarea value={tx} onChange={(e) => setTx(e.target.value)} placeholder={ph || (val ? "Considerações..." : "Por quê não?")} rows={2} style={{ ...I, fontSize: 11, marginTop: 4, resize: "vertical" as const, background: val ? "#f9fdf9" : "#fefafa" }} />}
-    </div>
-  );
-
   /* ── Cadência renderer ── */
   const renderCad = (c: any, open = false) => {
     const isOpen = open || exp === c.id;
@@ -302,9 +302,8 @@ export default function WoW() {
   const allN = [...CAD_SM, ...CAD_SDM];
   const fwN = allN.map((c, i) => ({ ...c, angle: -90 + (i * 360) / allN.length }));
 
-  const Framework = () => {
-    const cx = 50, cy = 50, r = 36;
-    return (
+  const fwCx = 50, fwCy = 50, fwR = 36;
+  const frameworkContent = (
       <div style={{ animation: "fadeIn .3s ease" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ ...S, fontSize: 28, fontWeight: 400 }}>Ciclo de <em style={{ fontStyle: "italic", color: "#1A3A8F" }}>Cadência</em></div>
@@ -312,19 +311,19 @@ export default function WoW() {
         </div>
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
           <svg viewBox="0 0 100 100" style={{ width: "100%", display: "block" }}>
-            <circle cx={cx} cy={cy} r={r + 6} fill="none" stroke="#7B5EA7" strokeWidth=".1" strokeDasharray="1 2" opacity=".2" />
-            <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1A3A8F" strokeWidth=".2" strokeDasharray="1.5 2" opacity=".12" />
+            <circle cx={fwCx} cy={fwCy} r={fwR + 6} fill="none" stroke="#7B5EA7" strokeWidth=".1" strokeDasharray="1 2" opacity=".2" />
+            <circle cx={fwCx} cy={fwCy} r={fwR} fill="none" stroke="#1A3A8F" strokeWidth=".2" strokeDasharray="1.5 2" opacity=".12" />
             {fwN.map((n, i) => {
               const nx2 = fwN[(i + 1) % fwN.length];
               const g = 360 / fwN.length;
               const a1 = ((n.angle + g * .15) * Math.PI) / 180, a2 = ((nx2.angle - g * .15) * Math.PI) / 180;
-              return (<g key={`a${i}`}><defs><marker id={`fw${i}`} markerWidth="3" markerHeight="2.5" refX="2.8" refY="1.25" orient="auto"><polygon points="0 0,3 1.25,0 2.5" fill={nx2.tagColor} opacity=".35" /></marker></defs><path d={`M${cx + r * Math.cos(a1)} ${cy + r * Math.sin(a1)}A${r} ${r} 0 0 1 ${cx + r * Math.cos(a2)} ${cy + r * Math.sin(a2)}`} fill="none" stroke={nx2.tagColor} strokeWidth=".3" strokeDasharray="1 1" opacity=".2" markerEnd={`url(#fw${i})`} /></g>);
+              return (<g key={`a${i}`}><defs><marker id={`fw${i}`} markerWidth="3" markerHeight="2.5" refX="2.8" refY="1.25" orient="auto"><polygon points="0 0,3 1.25,0 2.5" fill={nx2.tagColor} opacity=".35" /></marker></defs><path d={`M${fwCx + fwR * Math.cos(a1)} ${fwCy + fwR * Math.sin(a1)}A${fwR} ${fwR} 0 0 1 ${fwCx + fwR * Math.cos(a2)} ${fwCy + fwR * Math.sin(a2)}`} fill="none" stroke={nx2.tagColor} strokeWidth=".3" strokeDasharray="1 1" opacity=".2" markerEnd={`url(#fw${i})`} /></g>);
             })}
-            <circle cx={cx} cy={cy} r="9" fill="#0f1729" />
-            <text x={cx} y={cy - 1} textAnchor="middle" fill="#fff" fontSize="4" fontWeight="700" style={S}>SDM</text>
-            <text x={cx} y={cy + 2} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="1.5" style={M} letterSpacing=".05em">CONSOLIDA</text>
+            <circle cx={fwCx} cy={fwCy} r="9" fill="#0f1729" />
+            <text x={fwCx} y={fwCy - 1} textAnchor="middle" fill="#fff" fontSize="4" fontWeight="700" style={S}>SDM</text>
+            <text x={fwCx} y={fwCy + 2} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="1.5" style={M} letterSpacing=".05em">CONSOLIDA</text>
             {fwN.map((n, i) => {
-              const a = (n.angle * Math.PI) / 180, nx = cx + r * Math.cos(a), ny = cy + r * Math.sin(a);
+              const a = (n.angle * Math.PI) / 180, nx = fwCx + fwR * Math.cos(a), ny = fwCy + fwR * Math.sin(a);
               const h = hover === i, nr = h ? 6 : 5;
               const sdm = CAD_SDM.some((c) => c.id === n.id);
               return (
@@ -362,11 +361,10 @@ export default function WoW() {
           <div style={{ ...S, fontSize: 13, fontWeight: 300, lineHeight: 1.6, color: "rgba(255,255,255,.65)", fontStyle: "italic" }}>O report diário do SM alimenta tudo: sync, report pro G, apresentação à LM, munição pro Promotor. Um preenchimento por dia.</div>
         </div>
       </div>
-    );
-  };
+  );
 
   /* HOJE */
-  const Hoje = () => (
+  const hojeContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#0f1729", padding: "20px 18px", marginBottom: 16 }}>
         <div style={{ ...L, color: "rgba(255,255,255,.3)", marginBottom: 4 }}>Hoje</div>
@@ -486,7 +484,7 @@ export default function WoW() {
   );
 
   /* CADÊNCIAS */
-  const Cadencias = () => (
+  const cadenciasContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ ...L, color: "#1A3A8F", marginBottom: 6 }}>O que o SM faz</div>
       {CAD_SM.map((c) => renderCad(c))}
@@ -497,7 +495,7 @@ export default function WoW() {
   );
 
   /* PAPEL */
-  const Papel = () => (
+  const papelContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#0f1729", padding: "14px 16px", marginBottom: 12, borderLeft: "4px solid #1a6b5a" }}>
         <div style={{ ...L, color: "rgba(255,255,255,.3)", marginBottom: 2 }}>Modelo de Gestão · CTO</div>
@@ -523,7 +521,7 @@ export default function WoW() {
   );
 
   /* PADRÕES */
-  const Padroes = () => (
+  const padroesContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#fff", border: "1px solid #e8e4df", marginBottom: 10 }}>
         <div style={{ padding: "10px 16px", borderBottom: "1px solid #e8e4df", display: "flex", alignItems: "center", gap: 6 }}><span>✅</span><b style={{ fontSize: 13 }}>DoR — Definition of Ready</b></div>
@@ -582,11 +580,11 @@ export default function WoW() {
       </div>
       {/* CONTENT */}
       <div ref={ref} style={{ maxWidth: 1060, margin: "0 auto", padding: "16px 18px 50px" }}>
-        {tab === "framework" && <Framework />}
-        {tab === "hoje" && <Hoje />}
-        {tab === "cadencias" && <Cadencias />}
-        {tab === "papel" && <Papel />}
-        {tab === "padroes" && <Padroes />}
+        {tab === "framework" && frameworkContent}
+        {tab === "hoje" && hojeContent}
+        {tab === "cadencias" && cadenciasContent}
+        {tab === "papel" && papelContent}
+        {tab === "padroes" && padroesContent}
       </div>
     </div>
   );
