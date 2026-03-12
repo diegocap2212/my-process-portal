@@ -12,6 +12,8 @@ export default function WoW() {
   const [exp, setExp] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { reports, loading, submitReport, deleteReport } = useReports();
+  const stableSetTab = useCallback((t: string) => setTab(t), []);
+  const stableSetExp = useCallback((id: string | null) => setExp(id), []);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
