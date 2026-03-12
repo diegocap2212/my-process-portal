@@ -495,7 +495,7 @@ export default function WoW() {
   );
 
   /* PAPEL */
-  const Papel = () => (
+  const papelContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#0f1729", padding: "14px 16px", marginBottom: 12, borderLeft: "4px solid #1a6b5a" }}>
         <div style={{ ...L, color: "rgba(255,255,255,.3)", marginBottom: 2 }}>Modelo de Gestão · CTO</div>
