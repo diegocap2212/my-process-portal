@@ -302,9 +302,8 @@ export default function WoW() {
   const allN = [...CAD_SM, ...CAD_SDM];
   const fwN = allN.map((c, i) => ({ ...c, angle: -90 + (i * 360) / allN.length }));
 
-  const Framework = () => {
-    const cx = 50, cy = 50, r = 36;
-    return (
+  const fwCx = 50, fwCy = 50, fwR = 36;
+  const frameworkContent = (
       <div style={{ animation: "fadeIn .3s ease" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ ...S, fontSize: 28, fontWeight: 400 }}>Ciclo de <em style={{ fontStyle: "italic", color: "#1A3A8F" }}>Cadência</em></div>
