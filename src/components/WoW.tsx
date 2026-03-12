@@ -311,19 +311,19 @@ export default function WoW() {
         </div>
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
           <svg viewBox="0 0 100 100" style={{ width: "100%", display: "block" }}>
-            <circle cx={cx} cy={cy} r={r + 6} fill="none" stroke="#7B5EA7" strokeWidth=".1" strokeDasharray="1 2" opacity=".2" />
-            <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1A3A8F" strokeWidth=".2" strokeDasharray="1.5 2" opacity=".12" />
+            <circle cx={fwCx} cy={fwCy} r={fwR + 6} fill="none" stroke="#7B5EA7" strokeWidth=".1" strokeDasharray="1 2" opacity=".2" />
+            <circle cx={fwCx} cy={fwCy} r={fwR} fill="none" stroke="#1A3A8F" strokeWidth=".2" strokeDasharray="1.5 2" opacity=".12" />
             {fwN.map((n, i) => {
               const nx2 = fwN[(i + 1) % fwN.length];
               const g = 360 / fwN.length;
               const a1 = ((n.angle + g * .15) * Math.PI) / 180, a2 = ((nx2.angle - g * .15) * Math.PI) / 180;
-              return (<g key={`a${i}`}><defs><marker id={`fw${i}`} markerWidth="3" markerHeight="2.5" refX="2.8" refY="1.25" orient="auto"><polygon points="0 0,3 1.25,0 2.5" fill={nx2.tagColor} opacity=".35" /></marker></defs><path d={`M${cx + r * Math.cos(a1)} ${cy + r * Math.sin(a1)}A${r} ${r} 0 0 1 ${cx + r * Math.cos(a2)} ${cy + r * Math.sin(a2)}`} fill="none" stroke={nx2.tagColor} strokeWidth=".3" strokeDasharray="1 1" opacity=".2" markerEnd={`url(#fw${i})`} /></g>);
+              return (<g key={`a${i}`}><defs><marker id={`fw${i}`} markerWidth="3" markerHeight="2.5" refX="2.8" refY="1.25" orient="auto"><polygon points="0 0,3 1.25,0 2.5" fill={nx2.tagColor} opacity=".35" /></marker></defs><path d={`M${fwCx + fwR * Math.cos(a1)} ${fwCy + fwR * Math.sin(a1)}A${fwR} ${fwR} 0 0 1 ${fwCx + fwR * Math.cos(a2)} ${fwCy + fwR * Math.sin(a2)}`} fill="none" stroke={nx2.tagColor} strokeWidth=".3" strokeDasharray="1 1" opacity=".2" markerEnd={`url(#fw${i})`} /></g>);
             })}
-            <circle cx={cx} cy={cy} r="9" fill="#0f1729" />
-            <text x={cx} y={cy - 1} textAnchor="middle" fill="#fff" fontSize="4" fontWeight="700" style={S}>SDM</text>
-            <text x={cx} y={cy + 2} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="1.5" style={M} letterSpacing=".05em">CONSOLIDA</text>
+            <circle cx={fwCx} cy={fwCy} r="9" fill="#0f1729" />
+            <text x={fwCx} y={fwCy - 1} textAnchor="middle" fill="#fff" fontSize="4" fontWeight="700" style={S}>SDM</text>
+            <text x={fwCx} y={fwCy + 2} textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="1.5" style={M} letterSpacing=".05em">CONSOLIDA</text>
             {fwN.map((n, i) => {
-              const a = (n.angle * Math.PI) / 180, nx = cx + r * Math.cos(a), ny = cy + r * Math.sin(a);
+              const a = (n.angle * Math.PI) / 180, nx = fwCx + fwR * Math.cos(a), ny = fwCy + fwR * Math.sin(a);
               const h = hover === i, nr = h ? 6 : 5;
               const sdm = CAD_SDM.some((c) => c.id === n.id);
               return (
