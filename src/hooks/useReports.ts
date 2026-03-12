@@ -82,7 +82,7 @@ export function useReports() {
       console.error("Delete error:", e);
       toast.error("Erro ao remover report.");
     }
-  };
+  }, []);
 
   return { reports, loading, error, submitReport, deleteReport };
 }

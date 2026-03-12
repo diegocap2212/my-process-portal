@@ -43,4 +43,4 @@ const PapelTab: React.FC = () => (
   </div>
 );
 
-export default PapelTab;
+export default React.memo(PapelTab);

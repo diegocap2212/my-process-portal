@@ -62,4 +62,4 @@ const PadroesTab: React.FC = () => (
   </div>
 );
 
-export default PadroesTab;
+export default React.memo(PadroesTab);
