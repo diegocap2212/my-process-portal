@@ -51,7 +51,7 @@ export function useReports() {
     return unsub;
   }, []);
 
-  const submitReport = async (input: ReportInput): Promise<boolean> => {
+  const submitReport = useCallback(async (input: ReportInput): Promise<boolean> => {
     try {
       await addDoc(collection(db, "reports"), {
         ...input,
