@@ -1,14 +1,13 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// TODO: Substitua com suas credenciais do Firebase
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJETO",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID",
+  apiKey: "AIzaSyClC8dBIf10iktFmMtgmJQHQDzGkHvCLh8",
+  authDomain: "torre-lm.firebaseapp.com",
+  projectId: "torre-lm",
+  storageBucket: "torre-lm.firebasestorage.app",
+  messagingSenderId: "286848825985",
+  appId: "1:286848825985:web:b1cf31b41bef4130442b80",
 };
 
 const app = initializeApp(firebaseConfig);
