@@ -72,9 +72,9 @@ export function useReports() {
       toast.error("Erro ao salvar report. Verifique sua conexão.");
       return false;
     }
-  };
+  }, []);
 
-  const deleteReport = async (id: string) => {
+  const deleteReport = useCallback(async (id: string) => {
     try {
       await deleteDoc(doc(db, "reports", id));
       toast.success("Report removido.");
