@@ -22,4 +22,4 @@ const CadenciasTab: React.FC<CadenciasTabProps> = ({ exp, setExp }) => (
   </div>
 );
 
-export default CadenciasTab;
+export default React.memo(CadenciasTab);

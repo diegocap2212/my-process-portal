@@ -306,4 +306,4 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
   );
 };
 
-export default HojeTab;
+export default React.memo(HojeTab);

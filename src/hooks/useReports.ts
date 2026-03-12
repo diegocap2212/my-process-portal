@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { db } from "@/firebase";
 import {
   collection, addDoc, deleteDoc, doc, query,
@@ -51,7 +51,7 @@ export function useReports() {
     return unsub;
   }, []);
 
-  const submitReport = async (input: ReportInput): Promise<boolean> => {
+  const submitReport = useCallback(async (input: ReportInput): Promise<boolean> => {
     try {
       await addDoc(collection(db, "reports"), {
         ...input,
@@ -72,9 +72,9 @@ export function useReports() {
       toast.error("Erro ao salvar report. Verifique sua conexão.");
       return false;
     }
-  };
+  }, []);
 
-  const deleteReport = async (id: string) => {
+  const deleteReport = useCallback(async (id: string) => {
     try {
       await deleteDoc(doc(db, "reports", id));
       toast.success("Report removido.");
@@ -82,7 +82,7 @@ export function useReports() {
       console.error("Delete error:", e);
       toast.error("Erro ao remover report.");
     }
-  };
+  }, []);
 
   return { reports, loading, error, submitReport, deleteReport };
 }

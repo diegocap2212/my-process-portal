@@ -114,4 +114,4 @@ const FrameworkTab: React.FC<FrameworkTabProps> = ({ setTab, setExp }) => {
   );
 };
 
-export default FrameworkTab;
+export default React.memo(FrameworkTab);
