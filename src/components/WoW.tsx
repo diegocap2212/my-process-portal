@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useReports } from "@/hooks/useReports";
 import Navbar from "@/components/layout/Navbar";
 import FrameworkTab from "@/components/tabs/FrameworkTab";
