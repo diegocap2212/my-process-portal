@@ -521,7 +521,7 @@ export default function WoW() {
   );
 
   /* PADRÕES */
-  const Padroes = () => (
+  const padroesContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#fff", border: "1px solid #e8e4df", marginBottom: 10 }}>
         <div style={{ padding: "10px 16px", borderBottom: "1px solid #e8e4df", display: "flex", alignItems: "center", gap: 6 }}><span>✅</span><b style={{ fontSize: 13 }}>DoR — Definition of Ready</b></div>
