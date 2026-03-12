@@ -580,11 +580,11 @@ export default function WoW() {
       </div>
       {/* CONTENT */}
       <div ref={ref} style={{ maxWidth: 1060, margin: "0 auto", padding: "16px 18px 50px" }}>
-        {tab === "framework" && <Framework />}
-        {tab === "hoje" && <Hoje />}
-        {tab === "cadencias" && <Cadencias />}
-        {tab === "papel" && <Papel />}
-        {tab === "padroes" && <Padroes />}
+        {tab === "framework" && frameworkContent}
+        {tab === "hoje" && hojeContent}
+        {tab === "cadencias" && cadenciasContent}
+        {tab === "papel" && papelContent}
+        {tab === "padroes" && padroesContent}
       </div>
     </div>
   );
