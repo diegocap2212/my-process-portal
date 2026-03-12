@@ -361,11 +361,10 @@ export default function WoW() {
           <div style={{ ...S, fontSize: 13, fontWeight: 300, lineHeight: 1.6, color: "rgba(255,255,255,.65)", fontStyle: "italic" }}>O report diário do SM alimenta tudo: sync, report pro G, apresentação à LM, munição pro Promotor. Um preenchimento por dia.</div>
         </div>
       </div>
-    );
-  };
+  );
 
   /* HOJE */
-  const Hoje = () => (
+  const hojeContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ background: "#0f1729", padding: "20px 18px", marginBottom: 16 }}>
         <div style={{ ...L, color: "rgba(255,255,255,.3)", marginBottom: 4 }}>Hoje</div>
