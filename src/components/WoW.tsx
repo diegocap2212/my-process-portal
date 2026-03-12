@@ -484,7 +484,7 @@ export default function WoW() {
   );
 
   /* CADÊNCIAS */
-  const Cadencias = () => (
+  const cadenciasContent = (
     <div style={{ animation: "fadeIn .3s ease" }}>
       <div style={{ ...L, color: "#1A3A8F", marginBottom: 6 }}>O que o SM faz</div>
       {CAD_SM.map((c) => renderCad(c))}
