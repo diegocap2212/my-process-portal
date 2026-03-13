@@ -53,18 +53,24 @@ export function useReports() {
 
   const submitReport = useCallback(async (input: ReportInput): Promise<boolean> => {
     try {
-      await addDoc(collection(db, "reports"), {
-        ...input,
-        coneText: input.coneText.trim(),
-        pdtiText: input.pdtiText.trim(),
-        paradoText: input.paradoText.trim(),
-        wipEpicText: input.wipEpicText.trim(),
-        wipUsText: input.wipUsText.trim(),
-        oQue: input.oQue.trim(),
-        problemas: input.problemas.trim(),
-        acoes: input.acoes.trim(),
-        createdAt: serverTimestamp(),
-      });
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout: Firebase não respondeu em 15s")), 15000)
+      );
+      await Promise.race([
+        addDoc(collection(db, "reports"), {
+          ...input,
+          coneText: input.coneText.trim(),
+          pdtiText: input.pdtiText.trim(),
+          paradoText: input.paradoText.trim(),
+          wipEpicText: input.wipEpicText.trim(),
+          wipUsText: input.wipUsText.trim(),
+          oQue: input.oQue.trim(),
+          problemas: input.problemas.trim(),
+          acoes: input.acoes.trim(),
+          createdAt: serverTimestamp(),
+        }),
+        timeout,
+      ]);
       toast.success("Report salvo com sucesso!");
       return true;
     } catch (e) {
