@@ -17,7 +17,7 @@ const TABS = [
   { id: "padroes", l: "Padrões", ic: "◆" },
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => (
+const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange, onSignOut, userEmail }) => (
   <div style={{ background: "#0f1729", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,.06)" }}>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center", height: 44, gap: 10 }}>
       <div style={{ ...fontSerif, fontSize: 17, color: "#fff" }}>
