@@ -199,7 +199,7 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                   cursor: !rSm || !rSq ? "not-allowed" : "pointer",
                 }}>
                   {saving ? "Salvando..." : "Registrar report"}
-                </button>
+                </div>
               </div>
             )}
 
