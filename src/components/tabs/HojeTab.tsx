@@ -113,25 +113,11 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
           <div style={{ background: "#fff", border: "1px solid #e0dcd7", overflow: "hidden" }}>
             {/* Header */}
             <div style={{ borderBottom: "1px solid #e0dcd7" }}>
-              <div style={{ padding: "10px 14px 0", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 14 }}>📋</span>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>Report Diário</div>
                 <div style={{ flex: 1 }} />
                 <div style={{ fontSize: 8, color: "#2A6B50", ...fontMono, fontWeight: 600 }}>● FIREBASE</div>
-              </div>
-              <div style={{ display: "flex", padding: "0 14px", marginTop: 6 }}>
-                {[
-                  { id: "form", l: "Registrar" },
-                  ...(canViewHistory ? [{ id: "history", l: `Histórico (${reports.length})` }] : []),
-                ].map((m) => (
-                  <div key={m.id} onClick={() => setViewMode(m.id)} style={{
-                    padding: "6px 10px", fontSize: 11,
-                    fontWeight: viewMode === m.id ? 600 : 400,
-                    color: viewMode === m.id ? "#1A3A8F" : "#8a8580",
-                    borderBottom: viewMode === m.id ? "2px solid #1A3A8F" : "2px solid transparent",
-                    cursor: "pointer",
-                  }}>{m.l}</div>
-                ))}
               </div>
             </div>
 
