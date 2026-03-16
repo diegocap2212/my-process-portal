@@ -74,7 +74,6 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
     if (fRef.current) fRef.current.value = "";
   };
 
-  const filtered = filterSm ? reports.filter((r) => r.sm === filterSm) : reports;
 
   return (
     <div style={{ animation: "fadeIn .3s ease" }}>
