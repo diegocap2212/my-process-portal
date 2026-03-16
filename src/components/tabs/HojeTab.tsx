@@ -124,7 +124,10 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                 <div style={{ fontSize: 8, color: "#2A6B50", ...fontMono, fontWeight: 600 }}>● FIREBASE</div>
               </div>
               <div style={{ display: "flex", padding: "0 14px", marginTop: 6 }}>
-                {[{ id: "form", l: "Registrar" }, { id: "history", l: `Histórico (${reports.length})` }].map((m) => (
+                {[
+                  { id: "form", l: "Registrar" },
+                  ...(canViewHistory ? [{ id: "history", l: `Histórico (${reports.length})` }] : []),
+                ].map((m) => (
                   <div key={m.id} onClick={() => setViewMode(m.id)} style={{
                     padding: "6px 10px", fontSize: 11,
                     fontWeight: viewMode === m.id ? 600 : 400,
