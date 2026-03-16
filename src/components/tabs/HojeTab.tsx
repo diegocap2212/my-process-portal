@@ -18,7 +18,7 @@ interface HojeTabProps {
   canViewHistory?: boolean;
 }
 
-const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp }) => {
+const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp, canViewHistory = false }) => {
   const dow = new Date().getDay();
 
   // Form state
