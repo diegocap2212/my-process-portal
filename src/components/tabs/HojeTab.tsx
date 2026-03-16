@@ -121,9 +121,7 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
               </div>
             </div>
 
-            {/* FORM */}
-            {viewMode === "form" && (
-              <div style={{ padding: "12px 14px" }}>
+            <div style={{ padding: "12px 14px" }}>
                 <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ ...labelStyle, color: "#8a8580", marginBottom: 2, fontSize: 8 }}>SM</div>
