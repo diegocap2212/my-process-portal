@@ -5,6 +5,8 @@ interface NavbarProps {
   tab: string;
   setTab: (t: string) => void;
   onTabChange?: () => void;
+  onSignOut?: () => void;
+  userEmail?: string | null;
 }
 
 const TABS = [
@@ -15,7 +17,7 @@ const TABS = [
   { id: "padroes", l: "Padrões", ic: "◆" },
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => (
+const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange, onSignOut, userEmail }) => (
   <div style={{ background: "#0f1729", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,.06)" }}>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center", height: 44, gap: 10 }}>
       <div style={{ ...fontSerif, fontSize: 17, color: "#fff" }}>
@@ -25,6 +27,12 @@ const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => (
       <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "rgba(255,255,255,.3)", ...fontMono }}>WoW</div>
       <div style={{ flex: 1 }} />
       <div style={{ fontSize: 8, fontWeight: 600, padding: "2px 7px", background: "rgba(42,107,80,.15)", border: "1px solid rgba(42,107,80,.2)", color: "#2A6B50", ...fontMono }}>● FIREBASE</div>
+      {userEmail && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 9, color: "rgba(255,255,255,.4)" }}>{userEmail}</span>
+          <div onClick={onSignOut} style={{ fontSize: 9, color: "rgba(255,255,255,.3)", cursor: "pointer", padding: "2px 6px", border: "1px solid rgba(255,255,255,.1)" }}>Sair</div>
+        </div>
+      )}
     </div>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", overflowX: "auto" }}>
       {TABS.map((t) => (
