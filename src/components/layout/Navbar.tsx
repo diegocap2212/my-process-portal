@@ -5,6 +5,8 @@ interface NavbarProps {
   tab: string;
   setTab: (t: string) => void;
   onTabChange?: () => void;
+  onSignOut?: () => void;
+  userEmail?: string | null;
 }
 
 const TABS = [
