@@ -15,6 +15,7 @@ interface HojeTabProps {
   onDelete: (id: string) => void;
   setTab: (t: string) => void;
   setExp: (id: string | null) => void;
+  canViewHistory?: boolean;
 }
 
 const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp }) => {
