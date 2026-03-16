@@ -17,7 +17,7 @@ interface HojeTabProps {
   setExp: (id: string | null) => void;
 }
 
-const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp, canViewHistory = false }) => {
+const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp }) => {
   const dow = new Date().getDay();
 
   // Form state
