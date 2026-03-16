@@ -39,8 +39,6 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
   const [rAcoes, setRAcoes] = useState("");
   const [rImgs, setRImgs] = useState<{ data: string }[]>([]);
   const [saving, setSaving] = useState(false);
-  const [filterSm, setFilterSm] = useState("");
-  const [viewMode, setViewMode] = useState("form");
   const fRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
