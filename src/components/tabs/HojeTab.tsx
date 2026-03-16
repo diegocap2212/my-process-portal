@@ -15,10 +15,9 @@ interface HojeTabProps {
   onDelete: (id: string) => void;
   setTab: (t: string) => void;
   setExp: (id: string | null) => void;
-  canViewHistory?: boolean;
 }
 
-const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp, canViewHistory = false }) => {
+const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete, setTab, setExp }) => {
   const dow = new Date().getDay();
 
   // Form state
@@ -40,8 +39,6 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
   const [rAcoes, setRAcoes] = useState("");
   const [rImgs, setRImgs] = useState<{ data: string }[]>([]);
   const [saving, setSaving] = useState(false);
-  const [filterSm, setFilterSm] = useState("");
-  const [viewMode, setViewMode] = useState("form");
   const fRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
@@ -77,7 +74,6 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
     if (fRef.current) fRef.current.value = "";
   };
 
-  const filtered = filterSm ? reports.filter((r) => r.sm === filterSm) : reports;
 
   return (
     <div style={{ animation: "fadeIn .3s ease" }}>
@@ -117,31 +113,15 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
           <div style={{ background: "#fff", border: "1px solid #e0dcd7", overflow: "hidden" }}>
             {/* Header */}
             <div style={{ borderBottom: "1px solid #e0dcd7" }}>
-              <div style={{ padding: "10px 14px 0", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 14 }}>📋</span>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>Report Diário</div>
                 <div style={{ flex: 1 }} />
                 <div style={{ fontSize: 8, color: "#2A6B50", ...fontMono, fontWeight: 600 }}>● FIREBASE</div>
               </div>
-              <div style={{ display: "flex", padding: "0 14px", marginTop: 6 }}>
-                {[
-                  { id: "form", l: "Registrar" },
-                  ...(canViewHistory ? [{ id: "history", l: `Histórico (${reports.length})` }] : []),
-                ].map((m) => (
-                  <div key={m.id} onClick={() => setViewMode(m.id)} style={{
-                    padding: "6px 10px", fontSize: 11,
-                    fontWeight: viewMode === m.id ? 600 : 400,
-                    color: viewMode === m.id ? "#1A3A8F" : "#8a8580",
-                    borderBottom: viewMode === m.id ? "2px solid #1A3A8F" : "2px solid transparent",
-                    cursor: "pointer",
-                  }}>{m.l}</div>
-                ))}
-              </div>
             </div>
 
-            {/* FORM */}
-            {viewMode === "form" && (
-              <div style={{ padding: "12px 14px" }}>
+            <div style={{ padding: "12px 14px" }}>
                 <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ ...labelStyle, color: "#8a8580", marginBottom: 2, fontSize: 8 }}>SM</div>
@@ -221,88 +201,6 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                   {saving ? "Salvando..." : "Registrar report"}
                 </button>
               </div>
-            )}
-
-            {/* HISTORY */}
-            {viewMode === "history" && (
-              <div>
-                <div style={{ padding: "8px 14px", borderBottom: "1px solid #f0ece7", display: "flex", gap: 3, flexWrap: "wrap" }}>
-                  <div onClick={() => setFilterSm("")} style={{
-                    padding: "2px 7px", fontSize: 9,
-                    fontWeight: filterSm === "" ? 600 : 400,
-                    background: filterSm === "" ? "#0f1729" : "transparent",
-                    color: filterSm === "" ? "#fff" : "#8a8580",
-                    border: "1px solid " + (filterSm === "" ? "#0f1729" : "#e0dcd7"),
-                    cursor: "pointer",
-                  }}>Todos</div>
-                  {SM_NAMES.map((s) => (
-                    <div key={s} onClick={() => setFilterSm(s)} style={{
-                      padding: "2px 7px", fontSize: 9,
-                      fontWeight: filterSm === s ? 600 : 400,
-                      background: filterSm === s ? smColors[s] : "transparent",
-                      color: filterSm === s ? "#fff" : "#8a8580",
-                      border: "1px solid " + (filterSm === s ? smColors[s] : "#e0dcd7"),
-                      cursor: "pointer",
-                    }}>{s}</div>
-                  ))}
-                </div>
-                <div style={{ maxHeight: 460, overflowY: "auto" }}>
-                  {loading ? (
-                    <div style={{ padding: 16, textAlign: "center", color: "#aaa", fontSize: 11 }}>Carregando...</div>
-                  ) : filtered.length === 0 ? (
-                    <div style={{ padding: 16, textAlign: "center", color: "#aaa", fontSize: 11 }}>Nenhum report.</div>
-                  ) : (
-                    filtered.map((r) => (
-                      <div key={r.id} style={{ padding: "10px 14px", borderBottom: "1px solid #f0ece7" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
-                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: smColors[r.sm] || "#888" }} />
-                          <b style={{ fontSize: 11 }}>{r.sm}</b>
-                          <span style={{ fontSize: 8, fontWeight: 600, padding: "1px 4px", background: (smColors[r.sm] || "#888") + "12", color: smColors[r.sm], ...fontMono }}>{r.squad}</span>
-                          <span style={{ marginLeft: "auto", fontSize: 9, color: "#aaa", ...fontMono }}>{r.date}</span>
-                          <span onClick={() => onDelete(r.id)} style={{ fontSize: 12, color: "#ccc", cursor: "pointer" }}>×</span>
-                        </div>
-                        <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 4 }}>
-                          {[
-                            { l: "Cone", v: r.cone },
-                            { l: "PDTI", v: r.pdti },
-                            { l: "Parado", v: r.parado },
-                            { l: "WIP É", v: r.wipEpic },
-                            { l: "WIP U", v: r.wipUs },
-                          ].map((ck, i) =>
-                            ck.v != null ? (
-                              <span key={i} style={{
-                                fontSize: 8, fontWeight: 600, padding: "1px 4px",
-                                background: ck.v ? (ck.l === "Parado" ? "#9E3D2B15" : "#2A6B5015") : "#9E3D2B15",
-                                color: ck.v ? (ck.l === "Parado" ? "#9E3D2B" : "#2A6B50") : "#9E3D2B",
-                                ...fontMono,
-                              }}>
-                                {ck.l}: {ck.l === "Parado" ? (ck.v ? "⚠" : "✓") : ck.v ? "✓" : "✗"}
-                              </span>
-                            ) : null
-                          )}
-                        </div>
-                        {r.oQue && <div style={{ fontSize: 11, color: "#3d3a35", lineHeight: 1.5 }}>{r.oQue}</div>}
-                        {r.problemas && <div style={{ fontSize: 10, color: "#9E3D2B", marginTop: 3, paddingLeft: 7, borderLeft: "2px solid #9E3D2B30" }}>{r.problemas}</div>}
-                        {r.acoes && <div style={{ fontSize: 10, color: "#2A6B50", marginTop: 2, paddingLeft: 7, borderLeft: "2px solid #2A6B5030" }}>{r.acoes}</div>}
-                        {r.coneText && <div style={{ fontSize: 10, color: "#7B5EA7", marginTop: 2, paddingLeft: 7, borderLeft: "2px solid #7B5EA730" }}>Cone: {r.coneText}</div>}
-                        {r.pdtiText && <div style={{ fontSize: 10, color: "#7B5EA7", marginTop: 2, paddingLeft: 7, borderLeft: "2px solid #7B5EA730" }}>PDTI: {r.pdtiText}</div>}
-                        {r.wipEpicText && <div style={{ fontSize: 10, color: "#6B3A8A", marginTop: 2, paddingLeft: 7, borderLeft: "2px solid #6B3A8A30" }}>Épicos: {r.wipEpicText}</div>}
-                        {r.wipUsText && <div style={{ fontSize: 10, color: "#6B3A8A", marginTop: 2, paddingLeft: 7, borderLeft: "2px solid #6B3A8A30" }}>US: {r.wipUsText}</div>}
-                        {r.images?.length > 0 && (
-                          <div style={{ display: "flex", gap: 4, marginTop: 5 }}>
-                            {r.images.map((img: any, i: number) => (
-                              <img key={i} src={img.data || img.url} alt=""
-                                style={{ width: 60, height: 42, objectFit: "cover", border: "1px solid #e0dcd7", cursor: "pointer" }}
-                                onClick={() => window.open(img.data || img.url, "_blank")} />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
