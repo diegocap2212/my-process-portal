@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const { totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency } =
+  const { filtered, totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency } =
     useDashboardData(reports, { sm, squad, startDate, endDate });
 
   return (
