@@ -6,6 +6,7 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import KPICards from "@/components/dashboard/KPICards";
 import CheckpointChart from "@/components/dashboard/CheckpointChart";
 import SquadHealthTable from "@/components/dashboard/SquadHealthTable";
+import ReportDetailsList from "@/components/dashboard/ReportDetailsList";
 import { fontSerif, fontMono } from "@/styles/constants";
 
 export default function Dashboard() {
