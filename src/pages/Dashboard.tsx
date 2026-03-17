@@ -6,6 +6,7 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import KPICards from "@/components/dashboard/KPICards";
 import CheckpointChart from "@/components/dashboard/CheckpointChart";
 import SquadHealthTable from "@/components/dashboard/SquadHealthTable";
+import ReportDetailsList from "@/components/dashboard/ReportDetailsList";
 import { fontSerif, fontMono } from "@/styles/constants";
 
 export default function Dashboard() {
@@ -16,7 +17,7 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const { totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency } =
+  const { filtered, totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency } =
     useDashboardData(reports, { sm, squad, startDate, endDate });
 
   return (
@@ -73,6 +74,7 @@ export default function Dashboard() {
             <KPICards totalReports={totalReports} checkpointStats={checkpointStats} smFrequency={smFrequency} />
             <CheckpointChart data={weeklyTrends} />
             <SquadHealthTable data={squadHealth} />
+            <ReportDetailsList reports={filtered} />
           </>
         )}
       </div>

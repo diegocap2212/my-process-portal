@@ -88,31 +88,35 @@ export function useDashboardData(
       map.get(key)!.push(r);
     });
 
-    const result: SquadHealth[] = [];
-    // Include all known squads
+    // Collect all known SM|squad pairs from hardcoded + Firebase data
+    const seenKeys = new Set<string>();
     Object.entries(SM_SQUADS).forEach(([sm, squads]) => {
-      squads.forEach((squad) => {
-        const key = `${sm}|${squad}`;
-        const reps = map.get(key) || [];
-        const calc = (field: string) => {
-          const answered = reps.filter((r) => r[field as keyof Report] !== null);
-          if (answered.length === 0) return -1; // no data
-          const yes = answered.filter((r) => r[field as keyof Report] === true).length;
-          return Math.round((yes / answered.length) * 100);
-        };
-        result.push({
-          squad,
-          sm,
-          cone: calc("cone"),
-          pdti: calc("pdti"),
-          parado: calc("parado"),
-          wipEpic: calc("wipEpic"),
-          wipUs: calc("wipUs"),
-          totalReports: reps.length,
-        });
+      squads.forEach((squad) => seenKeys.add(`${sm}|${squad}`));
+    });
+    map.forEach((_, key) => seenKeys.add(key));
+
+    const result: SquadHealth[] = [];
+    seenKeys.forEach((key) => {
+      const [sm, squad] = key.split("|");
+      const reps = map.get(key) || [];
+      const calc = (field: string) => {
+        const answered = reps.filter((r) => r[field as keyof Report] !== null);
+        if (answered.length === 0) return -1;
+        const yes = answered.filter((r) => r[field as keyof Report] === true).length;
+        return Math.round((yes / answered.length) * 100);
+      };
+      result.push({
+        squad,
+        sm,
+        cone: calc("cone"),
+        pdti: calc("pdti"),
+        parado: calc("parado"),
+        wipEpic: calc("wipEpic"),
+        wipUs: calc("wipUs"),
+        totalReports: reps.length,
       });
     });
-    return result;
+    return result.sort((a, b) => a.sm.localeCompare(b.sm) || a.squad.localeCompare(b.squad));
   }, [filtered]);
 
   const weeklyTrends = useMemo<WeeklyTrend[]>(() => {
