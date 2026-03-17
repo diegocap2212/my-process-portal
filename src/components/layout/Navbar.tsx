@@ -16,7 +16,9 @@ const TABS = [
   { id: "padroes", l: "Padrões", ic: "◆" },
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => (
+const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => {
+  const navigate = useNavigate();
+  return (
   <div style={{ background: "#0f1729", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,.06)" }}>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center", height: 44, gap: 10 }}>
       <div style={{ ...fontSerif, fontSize: 17, color: "#fff" }}>
@@ -25,6 +27,10 @@ const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => (
       <div style={{ width: 1, height: 14, background: "rgba(255,255,255,.1)" }} />
       <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "rgba(255,255,255,.3)", ...fontMono }}>WoW</div>
       <div style={{ flex: 1 }} />
+      <div
+        onClick={() => navigate("/dashboard")}
+        style={{ fontSize: 9, fontWeight: 600, padding: "3px 8px", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.25)", color: "#c9a84c", cursor: "pointer", ...fontMono, marginRight: 6 }}
+      >📊 DASHBOARD</div>
       <div style={{ fontSize: 8, fontWeight: 600, padding: "2px 7px", background: "rgba(42,107,80,.15)", border: "1px solid rgba(42,107,80,.2)", color: "#2A6B50", ...fontMono }}>● FIREBASE</div>
     </div>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", overflowX: "auto" }}>
