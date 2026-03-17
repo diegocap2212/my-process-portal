@@ -52,6 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => {
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default Navbar;
