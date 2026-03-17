@@ -74,6 +74,7 @@ export default function Dashboard() {
             <KPICards totalReports={totalReports} checkpointStats={checkpointStats} smFrequency={smFrequency} />
             <CheckpointChart data={weeklyTrends} />
             <SquadHealthTable data={squadHealth} />
+            <ReportDetailsList reports={filtered} />
           </>
         )}
       </div>
