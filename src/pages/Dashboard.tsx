@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReports } from "@/hooks/useReports";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
+import DashboardExport from "@/components/dashboard/DashboardExport";
 import KPICards from "@/components/dashboard/KPICards";
+import BottleneckRadar from "@/components/dashboard/BottleneckRadar";
 import CheckpointChart from "@/components/dashboard/CheckpointChart";
+import ExecutiveSummary from "@/components/dashboard/ExecutiveSummary";
 import SquadHealthTable from "@/components/dashboard/SquadHealthTable";
 import ReportDetailsList from "@/components/dashboard/ReportDetailsList";
 import { fontSerif, fontMono } from "@/styles/constants";
@@ -16,8 +19,9 @@ export default function Dashboard() {
   const [squad, setSquad] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const { filtered, totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency } =
+  const { filtered, totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency, bottlenecks, smSummaries } =
     useDashboardData(reports, { sm, squad, startDate, endDate });
 
   return (
@@ -53,8 +57,16 @@ export default function Dashboard() {
 
       {/* Content */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 18px 50px" }}>
-        <div style={{ ...fontSerif, fontSize: 24, color: "hsl(222.2 84% 4.9%)", marginBottom: 4 }}>
-          Dashboard de Gestão
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <div style={{ ...fontSerif, fontSize: 24, color: "hsl(222.2 84% 4.9%)" }}>
+            Dashboard de Gestão
+          </div>
+          {!loading && (
+            <DashboardExport
+              dashboardRef={contentRef}
+              filters={{ sm, squad, startDate, endDate }}
+            />
+          )}
         </div>
         <div style={{ fontSize: 12, color: "hsl(215.4 16.3% 46.9%)", marginBottom: 16 }}>
           Métricas compiladas dos reports diários dos Scrum Masters
@@ -65,17 +77,19 @@ export default function Dashboard() {
             Carregando dados do Firebase...
           </div>
         ) : (
-          <>
+          <div ref={contentRef}>
             <DashboardFilters
               sm={sm} setSm={setSm} squad={squad} setSquad={setSquad}
               startDate={startDate} setStartDate={setStartDate}
               endDate={endDate} setEndDate={setEndDate}
             />
             <KPICards totalReports={totalReports} checkpointStats={checkpointStats} smFrequency={smFrequency} />
+            <BottleneckRadar bottlenecks={bottlenecks} />
             <CheckpointChart data={weeklyTrends} />
+            <ExecutiveSummary summaries={smSummaries} />
             <SquadHealthTable data={squadHealth} />
             <ReportDetailsList reports={filtered} />
-          </>
+          </div>
         )}
       </div>
     </div>
