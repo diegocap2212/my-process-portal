@@ -12,7 +12,6 @@ const typeEmoji: Record<string, string> = {
   wipEpic: "📊",
   wipUs: "📋",
   cone: "📐",
-  pdti: "📄",
 };
 
 const BottleneckRadar: React.FC<Props> = ({ bottlenecks }) => {
