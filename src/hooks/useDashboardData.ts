@@ -41,7 +41,7 @@ export interface SmFrequency {
 export interface Bottleneck {
   squad: string;
   sm: string;
-  type: "parado" | "wipEpic" | "wipUs" | "cone" | "pdti";
+  type: "parado" | "wipEpic" | "wipUs" | "cone";
   label: string;
   pct: number;
   severity: "critical" | "warning";
@@ -52,35 +52,19 @@ export interface SmSummary {
   sm: string;
   totalReports: number;
   squads: string[];
-  overallCompliance: number;
   recentProblems: string[];
   recentActions: string[];
+  recentOQue: string[];
   alertSquads: string[];
   squadsByType: Record<string, string[]>;
 }
 
-const CHECKPOINTS = [
-  { key: "cone", label: "Cone atualizado" },
-  { key: "pdti", label: "PDTI consistente" },
-  { key: "parado", label: "Item parado >2d" },
-  { key: "wipEpic", label: "WIP Épicos" },
-  { key: "wipUs", label: "WIP USs/Tasks" },
-] as const;
-
 const BOTTLENECK_CHECKS = [
-  { key: "parado", label: "Itens parados >2d", invertGood: true, threshold: 50 },
-  { key: "wipEpic", label: "WIP Épicos descontrolado", invertGood: false, threshold: 50 },
-  { key: "wipUs", label: "WIP USs descontrolado", invertGood: false, threshold: 50 },
-  { key: "cone", label: "Cone desatualizado", invertGood: false, threshold: 50 },
-  { key: "pdti", label: "PDTI inconsistente", invertGood: false, threshold: 50 },
+  { key: "parado", label: "Itens parados >2d", invertGood: true, threshold: 50, locaviaOnly: false },
+  { key: "wipEpic", label: "WIP Épicos descontrolado", invertGood: false, threshold: 50, locaviaOnly: false },
+  { key: "wipUs", label: "WIP USs descontrolado", invertGood: false, threshold: 50, locaviaOnly: false },
+  { key: "cone", label: "Cone desatualizado", invertGood: false, threshold: 50, locaviaOnly: true },
 ] as const;
-
-function getWeekKey(dateStr: string): string {
-  const d = new Date(dateStr + "T12:00:00");
-  const start = new Date(d);
-  start.setDate(d.getDate() - d.getDay() + 1);
-  return start.toISOString().slice(0, 10);
-}
 
 function calcPct(reports: Report[], field: string): number {
   const answered = reports.filter((r) => r[field as keyof Report] !== null);
@@ -103,71 +87,6 @@ export function useDashboardData(
     });
   }, [reports, filters.sm, filters.squad, filters.startDate, filters.endDate]);
 
-  const checkpointStats = useMemo<CheckpointStats[]>(() => {
-    return CHECKPOINTS.map(({ key, label }) => {
-      const answered = filtered.filter((r) => r[key as keyof Report] !== null);
-      const yes = answered.filter((r) => r[key as keyof Report] === true).length;
-      return {
-        key, label,
-        total: answered.length, yes,
-        no: answered.length - yes,
-        pct: answered.length > 0 ? Math.round((yes / answered.length) * 100) : 0,
-      };
-    });
-  }, [filtered]);
-
-  const squadHealth = useMemo<SquadHealth[]>(() => {
-    const map = new Map<string, Report[]>();
-    filtered.forEach((r) => {
-      const key = `${r.sm}|${r.squad}`;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(r);
-    });
-
-    const seenKeys = new Set<string>();
-    Object.entries(SM_SQUADS).forEach(([sm, squads]) => {
-      squads.forEach((squad) => seenKeys.add(`${sm}|${squad}`));
-    });
-    map.forEach((_, key) => seenKeys.add(key));
-
-    const result: SquadHealth[] = [];
-    seenKeys.forEach((key) => {
-      const [sm, squad] = key.split("|");
-      const reps = map.get(key) || [];
-      result.push({
-        squad, sm,
-        projectType: getSquadProjectType(squad),
-        cone: calcPct(reps, "cone"),
-        pdti: calcPct(reps, "pdti"),
-        parado: calcPct(reps, "parado"),
-        wipEpic: calcPct(reps, "wipEpic"),
-        wipUs: calcPct(reps, "wipUs"),
-        totalReports: reps.length,
-      });
-    });
-    return result.sort((a, b) => a.sm.localeCompare(b.sm) || a.squad.localeCompare(b.squad));
-  }, [filtered]);
-
-  const weeklyTrends = useMemo<WeeklyTrend[]>(() => {
-    const weeks = new Map<string, Report[]>();
-    filtered.forEach((r) => {
-      if (!r.date) return;
-      const wk = getWeekKey(r.date);
-      if (!weeks.has(wk)) weeks.set(wk, []);
-      weeks.get(wk)!.push(r);
-    });
-    return Array.from(weeks.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([week, reps]) => ({
-        week: week.slice(5),
-        cone: calcPct(reps, "cone") === -1 ? 0 : calcPct(reps, "cone"),
-        pdti: calcPct(reps, "pdti") === -1 ? 0 : calcPct(reps, "pdti"),
-        parado: calcPct(reps, "parado") === -1 ? 0 : calcPct(reps, "parado"),
-        wipEpic: calcPct(reps, "wipEpic") === -1 ? 0 : calcPct(reps, "wipEpic"),
-        wipUs: calcPct(reps, "wipUs") === -1 ? 0 : calcPct(reps, "wipUs"),
-      }));
-  }, [filtered]);
-
   const smFrequency = useMemo<SmFrequency[]>(() => {
     const map = new Map<string, number>();
     filtered.forEach((r) => map.set(r.sm, (map.get(r.sm) || 0) + 1));
@@ -176,7 +95,7 @@ export function useDashboardData(
       .sort((a, b) => b.count - a.count);
   }, [filtered]);
 
-  // Bottleneck detection
+  // Bottleneck detection — Cone only for Locavia, no PDTI
   const bottlenecks = useMemo<Bottleneck[]>(() => {
     const squadMap = new Map<string, Report[]>();
     filtered.forEach((r) => {
@@ -190,7 +109,12 @@ export function useDashboardData(
       const [sm, squad] = key.split("|");
       if (reps.length < 1) return;
 
+      const projectType = getSquadProjectType(squad);
+
       for (const check of BOTTLENECK_CHECKS) {
+        // Cone only for Locavia squads
+        if (check.locaviaOnly && projectType !== "Locavia") continue;
+
         const answered = reps.filter((r) => r[check.key as keyof Report] !== null);
         if (answered.length === 0) continue;
 
@@ -224,7 +148,7 @@ export function useDashboardData(
     });
   }, [filtered]);
 
-  // SM Executive Summaries
+  // SM Executive Summaries — no compliance, with oQue
   const smSummaries = useMemo<SmSummary[]>(() => {
     const smMap = new Map<string, Report[]>();
     filtered.forEach((r) => {
@@ -237,16 +161,6 @@ export function useDashboardData(
         const squads = [...new Set(reps.map((r) => r.squad))];
         const sorted = [...reps].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
-        // Overall compliance: avg of all checkpoint %yes (excluding parado which is inverted)
-        const fields = ["cone", "pdti", "wipEpic", "wipUs"];
-        const pcts = fields.map((f) => {
-          const p = calcPct(reps, f);
-          return p === -1 ? 0 : p;
-        });
-        const paradoPct = calcPct(reps, "parado");
-        pcts.push(paradoPct === -1 ? 100 : 100 - paradoPct); // invert parado
-        const overallCompliance = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
-
         const recentProblems = sorted
           .filter((r) => r.problemas?.trim())
           .slice(0, 5)
@@ -257,12 +171,16 @@ export function useDashboardData(
           .slice(0, 5)
           .map((r) => `[${r.squad} ${r.date}] ${r.acoes}`);
 
+        const recentOQue = sorted
+          .filter((r) => r.oQue?.trim())
+          .slice(0, 5)
+          .map((r) => `[${r.squad} ${r.date}] ${r.oQue}`);
+
         // Squads with alerts (any checkpoint in red)
         const alertSquads = squads.filter((sq) => {
           const sqReps = reps.filter((r) => r.squad === sq);
           const paradoP = calcPct(sqReps, "parado");
-          const coneP = calcPct(sqReps, "cone");
-          return (paradoP !== -1 && paradoP >= 50) || (coneP !== -1 && coneP < 40);
+          return paradoP !== -1 && paradoP >= 50;
         });
 
         // Group squads by project type
@@ -274,8 +192,8 @@ export function useDashboardData(
         });
 
         return {
-          sm, totalReports: reps.length, squads, overallCompliance,
-          recentProblems, recentActions, alertSquads, squadsByType,
+          sm, totalReports: reps.length, squads,
+          recentProblems, recentActions, recentOQue, alertSquads, squadsByType,
         };
       })
       .sort((a, b) => a.sm.localeCompare(b.sm));
@@ -283,7 +201,6 @@ export function useDashboardData(
 
   return {
     filtered, totalReports: filtered.length,
-    checkpointStats, squadHealth, weeklyTrends, smFrequency,
-    bottlenecks, smSummaries,
+    smFrequency, bottlenecks, smSummaries,
   };
 }

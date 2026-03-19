@@ -4,11 +4,9 @@ import { useReports } from "@/hooks/useReports";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import DashboardExport from "@/components/dashboard/DashboardExport";
-import KPICards from "@/components/dashboard/KPICards";
+import ContextCards from "@/components/dashboard/ContextCards";
 import BottleneckRadar from "@/components/dashboard/BottleneckRadar";
-import CheckpointChart from "@/components/dashboard/CheckpointChart";
 import ExecutiveSummary from "@/components/dashboard/ExecutiveSummary";
-import SquadHealthTable from "@/components/dashboard/SquadHealthTable";
 import ReportDetailsList from "@/components/dashboard/ReportDetailsList";
 import { fontSerif, fontMono } from "@/styles/constants";
 
@@ -21,7 +19,7 @@ export default function Dashboard() {
   const [endDate, setEndDate] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { filtered, totalReports, checkpointStats, squadHealth, weeklyTrends, smFrequency, bottlenecks, smSummaries } =
+  const { filtered, totalReports, smFrequency, bottlenecks, smSummaries } =
     useDashboardData(reports, { sm, squad, startDate, endDate });
 
   return (
@@ -83,11 +81,15 @@ export default function Dashboard() {
               startDate={startDate} setStartDate={setStartDate}
               endDate={endDate} setEndDate={setEndDate}
             />
-            <KPICards totalReports={totalReports} checkpointStats={checkpointStats} smFrequency={smFrequency} />
+            <ContextCards
+              totalReports={totalReports}
+              smFrequency={smFrequency}
+              bottleneckCount={bottlenecks.length}
+              criticalCount={bottlenecks.filter(b => b.severity === "critical").length}
+              reports={filtered}
+            />
             <BottleneckRadar bottlenecks={bottlenecks} />
-            <CheckpointChart data={weeklyTrends} />
-            <ExecutiveSummary summaries={smSummaries} />
-            <SquadHealthTable data={squadHealth} />
+            <ExecutiveSummary summaries={smSummaries} bottlenecks={bottlenecks} />
             <ReportDetailsList reports={filtered} />
           </div>
         )}
