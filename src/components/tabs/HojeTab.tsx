@@ -161,7 +161,7 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                 </div>
 
                 <div style={{ ...labelStyle, color: "#2A6B50", marginBottom: 5, marginTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ width: 12, height: 1, background: "#2A6B50" }} />Contexto
+                  <span style={{ width: 12, height: 1, background: "#2A6B50" }} />Resultados & Contexto
                 </div>
                 <textarea value={rOque} onChange={(e) => setROque(e.target.value)} placeholder="Principais entregas e resultados do dia — o que foi concluído, o que avançou?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
                 <textarea value={rProb} onChange={(e) => setRProb(e.target.value)} placeholder="Riscos ativos e impedimentos — o que pode impactar entregas?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
