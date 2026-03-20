@@ -3,7 +3,7 @@ import { labelStyle, fontMono, inputStyle, selectStyle, compress, DAY_NAMES } fr
 import { fontSerif } from "@/styles/constants";
 import { CAD_SM, CAD_SDM } from "@/data/cadencias";
 import { LINKS } from "@/data/links";
-import { SM_SQUADS, SM_NAMES, smColors } from "@/data/squads";
+import { SM_SQUADS, SM_NAMES, smColors, getSquadProjectType } from "@/data/squads";
 import CadenciaCard from "@/components/shared/CadenciaCard";
 import Checkpoint from "@/components/report/Checkpoint";
 import type { Report } from "@/types/report";
