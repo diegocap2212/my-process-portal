@@ -146,11 +146,12 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                 <div style={{ ...labelStyle, color: "#7B5EA7", marginBottom: 5, marginTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 12, height: 1, background: "#7B5EA7" }} />Checkpoints
                 </div>
-                <Checkpoint label="Cone atualizado e analisado?" link={LINKS.cone} val={rCone} setVal={setRCone} tx={rConeTx} setTx={setRConeTx} ph="Análise do cone..." />
-                <Checkpoint label="PDTI atualizado e consistente?" link={LINKS.pdti} val={rPdti} setVal={setRPdti} tx={rPdtiTx} setTx={setRPdtiTx} ph="Observações PDTI..." />
-                <Checkpoint label="Item parado >2 dias?" val={rParado} setVal={setRParado} tx={rParadoTx} setTx={setRParadoTx} ph="Quais? O que está fazendo?" />
-                <Checkpoint label="WIP Épicos sob controle?" val={rWipE} setVal={setRWipE} tx={rWipETx} setTx={setRWipETx} ph="Quais épicos? Progresso?" />
-                <Checkpoint label="WIP USs/Tasks — começando e terminando?" val={rWipU} setVal={setRWipU} tx={rWipUTx} setTx={setRWipUTx} ph="Fluxo ok?" />
+                {getSquadProjectType(rSq) === "Locavia" && (
+                  <Checkpoint label="Cone atualizado e analisado?" link={LINKS.cone} val={rCone} setVal={setRCone} tx={rConeTx} setTx={setRConeTx} ph="Análise do cone — restantes, transbordo, projeção..." />
+                )}
+                <Checkpoint label="Item parado >2 dias?" val={rParado} setVal={setRParado} tx={rParadoTx} setTx={setRParadoTx} ph="Quais itens? Qual ação tomada para desbloquear?" />
+                <Checkpoint label="WIP Épicos sob controle?" val={rWipE} setVal={setRWipE} tx={rWipETx} setTx={setRWipETx} ph="Quais épicos ativos? Progresso atual?" />
+                <Checkpoint label="WIP USs/Tasks — começando e terminando?" val={rWipU} setVal={setRWipU} tx={rWipUTx} setTx={setRWipUTx} ph="Fluxo de entrega ok? Itens completados?" />
 
                 <div style={{ padding: "8px 10px", background: "#f9f8f6", border: "1px solid #e8e4df", marginBottom: 8, marginTop: 4 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, color: "#6B3A8A", ...fontMono, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 4 }}>Painéis Lançamento</div>
