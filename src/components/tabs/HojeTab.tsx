@@ -163,9 +163,9 @@ const HojeTab: React.FC<HojeTabProps> = ({ reports, loading, onSubmit, onDelete,
                 <div style={{ ...labelStyle, color: "#2A6B50", marginBottom: 5, marginTop: 10, display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 12, height: 1, background: "#2A6B50" }} />Contexto
                 </div>
-                <textarea value={rOque} onChange={(e) => setROque(e.target.value)} placeholder="O que aconteceu hoje?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
-                <textarea value={rProb} onChange={(e) => setRProb(e.target.value)} placeholder="Problemas / impedimentos..." rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
-                <textarea value={rAcoes} onChange={(e) => setRAcoes(e.target.value)} placeholder="Soluções / próximos passos..." rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
+                <textarea value={rOque} onChange={(e) => setROque(e.target.value)} placeholder="Principais entregas e resultados do dia — o que foi concluído, o que avançou?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
+                <textarea value={rProb} onChange={(e) => setRProb(e.target.value)} placeholder="Riscos ativos e impedimentos — o que pode impactar entregas?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
+                <textarea value={rAcoes} onChange={(e) => setRAcoes(e.target.value)} placeholder="Decisões tomadas e próximos passos — o que foi resolvido, o que vem a seguir?" rows={2} style={{ ...inputStyle, marginBottom: 5, resize: "vertical" as const }} />
 
                 <div style={{ ...labelStyle, color: "#9A7B10", marginBottom: 5, marginTop: 8, display: "flex", alignItems: "center", gap: 5 }}>
                   <span style={{ width: 12, height: 1, background: "#9A7B10" }} />Evidência (max 2)
