@@ -31,7 +31,10 @@ const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => {
         onClick={() => navigate("/dashboard")}
         style={{ fontSize: 9, fontWeight: 600, padding: "3px 8px", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.25)", color: "#c9a84c", cursor: "pointer", ...fontMono, marginRight: 6 }}
       >📊 DASHBOARD</div>
-      <div style={{ fontSize: 8, fontWeight: 600, padding: "2px 7px", background: "rgba(42,107,80,.15)", border: "1px solid rgba(42,107,80,.2)", color: "#2A6B50", ...fontMono }}>● FIREBASE</div>
+      <div
+        onClick={() => navigate("/v2")}
+        style={{ fontSize: 9, fontWeight: 600, padding: "3px 8px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", color: "#c9a84c", cursor: "pointer", ...fontMono }}
+      >◉ WoW v2</div>
     </div>
     <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", overflowX: "auto" }}>
       {TABS.map((t) => (
