@@ -14,8 +14,7 @@ export const SM_SQUAD_DETAILS: Record<string, SquadInfo[]> = {
   ],
   Gabriela: [
     { name: "Canal Indireto", projectType: "Sustentação" },
-    { name: "Esteira de Crédito", projectType: "Locavia", description: "Crédito" },
-    { name: "Portal Vendas Assistidas", projectType: "Locavia", description: "Portal de Vendas" },
+    { name: "Taos", projectType: "Locavia", description: "Crédito, Proposta e Time" },
   ],
   Rafael: [
     { name: "Nivus", projectType: "Locavia", description: "Portal Autoatendimento" },
