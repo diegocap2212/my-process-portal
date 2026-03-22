@@ -4,16 +4,48 @@ import { fontSerif, fontMono } from "@/styles/constants";
 import SmReportTab from "@/components/wow-v2/SmReportTab";
 import SdmTab from "@/components/wow-v2/SdmTab";
 import HistoricoTab from "@/components/wow-v2/HistoricoTab";
+import FrameworkTab from "@/components/tabs/FrameworkTab";
+import CadenciasTab from "@/components/tabs/CadenciasTab";
+import PapelTab from "@/components/tabs/PapelTab";
+import PadroesTab from "@/components/tabs/PadroesTab";
 
-const TABS = [
+const OPS_TABS = [
   { id: "report", label: "Report SM", icon: "◉" },
   { id: "sdm", label: "Visão SDM", icon: "◎" },
   { id: "historico", label: "Histórico", icon: "↻" },
 ];
 
+const REF_TABS = [
+  { id: "framework", label: "Framework", icon: "◯" },
+  { id: "cadencias", label: "Cadências", icon: "↻" },
+  { id: "papel", label: "Papel", icon: "◎" },
+  { id: "padroes", label: "Padrões", icon: "◆" },
+];
+
 export default function WoWV2() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("report");
+  const [exp, setExp] = useState<string | null>(null);
+
+  const renderTab = (t: typeof OPS_TABS[0], isRef = false) => (
+    <div
+      key={t.id}
+      onClick={() => setTab(t.id)}
+      style={{
+        padding: "7px 14px", fontSize: 11,
+        fontWeight: tab === t.id ? 600 : 400,
+        color: tab === t.id ? "#fff" : isRef ? "rgba(255,255,255,.25)" : "rgba(255,255,255,.35)",
+        cursor: "pointer",
+        borderBottom: tab === t.id ? `2px solid ${isRef ? "rgba(201,168,76,.5)" : "#c9a84c"}` : "2px solid transparent",
+        display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap",
+        fontFamily: "'DM Sans',sans-serif",
+        opacity: isRef && tab !== t.id ? 0.7 : 1,
+      }}
+    >
+      <span style={{ fontSize: 9, opacity: tab === t.id ? 1 : 0.4 }}>{t.icon}</span>
+      {t.label}
+    </div>
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f3ef" }}>
@@ -50,25 +82,11 @@ export default function WoWV2() {
         </div>
 
         {/* Sub-tabs */}
-        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex" }}>
-          {TABS.map((t) => (
-            <div
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              style={{
-                padding: "7px 14px", fontSize: 11,
-                fontWeight: tab === t.id ? 600 : 400,
-                color: tab === t.id ? "#fff" : "rgba(255,255,255,.35)",
-                cursor: "pointer",
-                borderBottom: tab === t.id ? "2px solid #c9a84c" : "2px solid transparent",
-                display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap",
-                fontFamily: "'DM Sans',sans-serif",
-              }}
-            >
-              <span style={{ fontSize: 9, opacity: tab === t.id ? 1 : 0.4 }}>{t.icon}</span>
-              {t.label}
-            </div>
-          ))}
+        <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center" }}>
+          {OPS_TABS.map((t) => renderTab(t, false))}
+          {/* Separator */}
+          <div style={{ width: 1, height: 16, background: "rgba(255,255,255,.08)", margin: "0 10px", flexShrink: 0 }} />
+          {REF_TABS.map((t) => renderTab(t, true))}
         </div>
       </div>
 
@@ -80,17 +98,29 @@ export default function WoWV2() {
             {tab === "report" && "Report Semanal"}
             {tab === "sdm" && "Visão Consolidada"}
             {tab === "historico" && "Histórico de Reports"}
+            {tab === "framework" && "Ciclo de Cadência"}
+            {tab === "cadencias" && "Cadências"}
+            {tab === "papel" && "Papel & Regras"}
+            {tab === "padroes" && "Padrões & Métricas"}
           </div>
           <div style={{ fontSize: 11, color: "rgba(26,29,35,.4)", fontFamily: "'DM Sans',sans-serif" }}>
             {tab === "report" && "Métricas do cone automáticas + 3 perguntas qualitativas · Preenchimento semanal (sexta)"}
             {tab === "sdm" && "Consolidação da torre para o sync de segunda · Métricas + contexto qualitativo"}
             {tab === "historico" && "Timeline de todos os reports semanais enviados"}
+            {tab === "framework" && "Visualização do ciclo completo de cadências da torre"}
+            {tab === "cadencias" && "Todas as cadências do SM e SDM em detalhe"}
+            {tab === "papel" && "O que o SM faz, não faz, anti-padrões e a tríade"}
+            {tab === "padroes" && "DoR, DoD, métricas obrigatórias e proteção baseada em fatos"}
           </div>
         </div>
 
         {tab === "report" && <SmReportTab />}
         {tab === "sdm" && <SdmTab />}
         {tab === "historico" && <HistoricoTab />}
+        {tab === "framework" && <FrameworkTab setTab={setTab} setExp={setExp} />}
+        {tab === "cadencias" && <CadenciasTab exp={exp} setExp={setExp} />}
+        {tab === "papel" && <PapelTab />}
+        {tab === "padroes" && <PadroesTab />}
       </div>
     </div>
   );
