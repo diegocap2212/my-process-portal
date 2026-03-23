@@ -37,7 +37,8 @@ function getSquadTeams(squadName: string, sm: string): string[] {
 export function useSquadDashboard(
   rawItems: JiraItem[],
   squadName: string,
-  sm: string
+  sm: string,
+  overrides?: SquadDataOverride[]
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
