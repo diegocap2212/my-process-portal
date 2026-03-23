@@ -64,12 +64,6 @@ export default function WoWV2() {
           </div>
           <div style={{ flex: 1 }} />
           <div
-            onClick={() => navigate("/")}
-            style={{ fontSize: 10, color: "rgba(255,255,255,.35)", cursor: "pointer", padding: "4px 8px", ...fontMono }}
-          >
-            ← WoW v1
-          </div>
-          <div
             onClick={() => navigate("/dashboard")}
             style={{
               fontSize: 9, fontWeight: 600, padding: "3px 8px",
