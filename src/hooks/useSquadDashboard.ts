@@ -174,6 +174,9 @@ export function useSquadDashboard(
 
       const saldo = finalEntradas - finalSaidas;
 
+      const total = planejadas + naoPlanejadas;
+      const percentPlanejado = total > 0 ? +((planejadas / total) * 100).toFixed(0) : 0;
+
       return {
         week: label,
         weekDate: weekStart,
@@ -182,12 +185,22 @@ export function useSquadDashboard(
         naoPlanejadas,
         vazaoTotal: hasOverride ? finalSaidas : saidas,
         leadTime: weekLeadTime,
+        percentPlanejado,
+        mediaMovel: 0, // calculated below
         entradas: finalEntradas,
         saidas: finalSaidas,
         saldo,
         hasOverride,
       };
     });
+
+    // Calculate 4-week moving average for vazaoTotal
+    for (let i = 0; i < weeklyData.length; i++) {
+      const start = Math.max(0, i - 3);
+      const window = weeklyData.slice(start, i + 1);
+      const avg = window.reduce((s, w) => s + w.vazaoTotal, 0) / window.length;
+      weeklyData[i].mediaMovel = +avg.toFixed(1);
+    }
 
     // Cone projection (como Vercel): velocity = totalEntregas / totalSemanas desde primeira entrega
     const currentAFazer = weeklyData[weeklyData.length - 1]?.aFazer || 0;
