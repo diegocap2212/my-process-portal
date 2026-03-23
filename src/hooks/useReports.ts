@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { db } from "@/firebase";
-import {
-  collection, addDoc, deleteDoc, doc, query,
-  orderBy, onSnapshot, serverTimestamp,
-} from "firebase/firestore";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Report } from "@/types/report";
 
@@ -27,50 +23,88 @@ interface ReportInput {
   images: { data: string }[];
 }
 
+function mapDbToReport(row: any): Report {
+  return {
+    id: row.id,
+    sm: row.sm,
+    squad: row.squad,
+    date: row.date,
+    cone: row.cone,
+    coneText: row.cone_text,
+    pdti: row.pdti,
+    pdtiText: row.pdti_text,
+    parado: row.parado,
+    paradoText: row.parado_text,
+    wipEpic: row.wip_epic,
+    wipEpicText: row.wip_epic_text,
+    wipUs: row.wip_us,
+    wipUsText: row.wip_us_text,
+    oQue: row.o_que,
+    problemas: row.problemas,
+    acoes: row.acoes,
+    images: row.images || [],
+    createdAt: row.created_at,
+  };
+}
+
 export function useReports() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setReports(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Report)));
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error("Firestore error:", err);
-        setError(err.message);
-        setLoading(false);
-        toast.error("Erro ao conectar ao Firebase. Verifique as regras de segurança.");
-      }
-    );
-    return unsub;
+  const fetchReports = useCallback(async () => {
+    const { data, error: err } = await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (err) {
+      console.error("Reports error:", err);
+      setError(err.message);
+      toast.error("Erro ao carregar reports.");
+    } else {
+      setReports((data || []).map(mapDbToReport));
+      setError(null);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchReports();
+
+    const channel = supabase
+      .channel("reports_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reports" }, () => {
+        fetchReports();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchReports]);
 
   const submitReport = useCallback(async (input: ReportInput): Promise<boolean> => {
     try {
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout: Firebase não respondeu em 15s")), 15000)
-      );
-      await Promise.race([
-        addDoc(collection(db, "reports"), {
-          ...input,
-          coneText: input.coneText.trim(),
-          pdtiText: input.pdtiText.trim(),
-          paradoText: input.paradoText.trim(),
-          wipEpicText: input.wipEpicText.trim(),
-          wipUsText: input.wipUsText.trim(),
-          oQue: input.oQue.trim(),
-          problemas: input.problemas.trim(),
-          acoes: input.acoes.trim(),
-          createdAt: serverTimestamp(),
-        }),
-        timeout,
-      ]);
+      const { error } = await supabase.from("reports").insert({
+        sm: input.sm,
+        squad: input.squad,
+        date: input.date,
+        cone: input.cone,
+        cone_text: input.coneText.trim(),
+        pdti: input.pdti,
+        pdti_text: input.pdtiText.trim(),
+        parado: input.parado,
+        parado_text: input.paradoText.trim(),
+        wip_epic: input.wipEpic,
+        wip_epic_text: input.wipEpicText.trim(),
+        wip_us: input.wipUs,
+        wip_us_text: input.wipUsText.trim(),
+        o_que: input.oQue.trim(),
+        problemas: input.problemas.trim(),
+        acoes: input.acoes.trim(),
+        images: input.images,
+      });
+
+      if (error) throw error;
       toast.success("Report salvo com sucesso!");
       return true;
     } catch (e) {
@@ -82,7 +116,8 @@ export function useReports() {
 
   const deleteReport = useCallback(async (id: string) => {
     try {
-      await deleteDoc(doc(db, "reports", id));
+      const { error } = await supabase.from("reports").delete().eq("id", id);
+      if (error) throw error;
       toast.success("Report removido.");
     } catch (e) {
       console.error("Delete error:", e);

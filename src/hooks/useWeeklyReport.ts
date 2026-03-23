@@ -1,18 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import { db } from "@/firebase";
-import {
-  collection, addDoc, query, orderBy, onSnapshot, serverTimestamp,
-} from "firebase/firestore";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface WeeklyReport {
   id: string;
   sm: string;
-  week: string; // YYYY-Wnn
-  q1: string; // tração
-  q2: string; // travado/escalação
-  q3: string; // narrativa cliente
-  createdAt: any;
+  week: string;
+  q1: string;
+  q2: string;
+  q3: string;
+  created_at: string;
 }
 
 export interface WeeklyReportInput {
@@ -36,38 +33,45 @@ export function useWeeklyReports() {
   const [reports, setReports] = useState<WeeklyReport[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const q = query(collection(db, "weeklyReports"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setReports(snap.docs.map((d) => ({ id: d.id, ...d.data() } as WeeklyReport)));
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Weekly reports error:", err);
-        setLoading(false);
-        toast.error("Erro ao carregar reports semanais.");
-      }
-    );
-    return unsub;
+  const fetchReports = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("weekly_reports")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Weekly reports error:", error);
+      toast.error("Erro ao carregar reports semanais.");
+    } else {
+      setReports(data as WeeklyReport[]);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchReports();
+
+    const channel = supabase
+      .channel("weekly_reports_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "weekly_reports" }, () => {
+        fetchReports();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchReports]);
 
   const submitWeeklyReport = useCallback(async (input: WeeklyReportInput): Promise<boolean> => {
     try {
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 15000)
-      );
-      await Promise.race([
-        addDoc(collection(db, "weeklyReports"), {
-          ...input,
-          q1: input.q1.trim(),
-          q2: input.q2.trim(),
-          q3: input.q3.trim(),
-          createdAt: serverTimestamp(),
-        }),
-        timeout,
-      ]);
+      const { error } = await supabase.from("weekly_reports").insert({
+        sm: input.sm,
+        week: input.week,
+        q1: input.q1.trim(),
+        q2: input.q2.trim(),
+        q3: input.q3.trim(),
+      });
+
+      if (error) throw error;
       toast.success("Report semanal salvo!");
       return true;
     } catch (e) {
