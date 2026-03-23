@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { JiraItem } from "@/services/metricsCalculator";
-import { parseExcelDate, getMonday, formatWeekLabel } from "@/services/metricsCalculator";
+import { parseExcelDate, getMonday, formatWeekLabel, formatWeekRange } from "@/services/metricsCalculator";
 import { JIRA_TEAM_TO_SQUAD } from "@/services/metricsCalculator";
 import type { SquadDataOverride } from "@/hooks/useSquadReports";
 
