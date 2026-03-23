@@ -1,28 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-export interface Report {
-  id: string;
-  sm: string;
-  squad: string;
-  date: string;
-  cone: boolean | null;
-  cone_text: string;
-  pdti: boolean | null;
-  pdti_text: string;
-  parado: boolean | null;
-  parado_text: string;
-  wip_epic: boolean | null;
-  wip_epic_text: string;
-  wip_us: boolean | null;
-  wip_us_text: string;
-  o_que: string;
-  problemas: string;
-  acoes: string;
-  images: { data: string }[];
-  created_at: string;
-}
+import type { Report } from "@/types/report";
 
 interface ReportInput {
   sm: string;
@@ -44,6 +23,30 @@ interface ReportInput {
   images: { data: string }[];
 }
 
+function mapDbToReport(row: any): Report {
+  return {
+    id: row.id,
+    sm: row.sm,
+    squad: row.squad,
+    date: row.date,
+    cone: row.cone,
+    coneText: row.cone_text,
+    pdti: row.pdti,
+    pdtiText: row.pdti_text,
+    parado: row.parado,
+    paradoText: row.parado_text,
+    wipEpic: row.wip_epic,
+    wipEpicText: row.wip_epic_text,
+    wipUs: row.wip_us,
+    wipUsText: row.wip_us_text,
+    oQue: row.o_que,
+    problemas: row.problemas,
+    acoes: row.acoes,
+    images: row.images || [],
+    createdAt: row.created_at,
+  };
+}
+
 export function useReports() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +63,7 @@ export function useReports() {
       setError(err.message);
       toast.error("Erro ao carregar reports.");
     } else {
-      setReports(data as Report[]);
+      setReports((data || []).map(mapDbToReport));
       setError(null);
     }
     setLoading(false);
