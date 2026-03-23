@@ -25,6 +25,7 @@ const SmReportTab: React.FC = () => {
   const [q3, setQ3] = useState("");
   const [q4, setQ4] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [periodDays, setPeriodDays] = useState(28);
 
   const { submitWeeklyReport } = useWeeklyReports();
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
