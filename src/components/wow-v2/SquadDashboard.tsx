@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
-  AreaChart, Area, BarChart, Bar, ComposedChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
+  AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { useSquadDashboard } from "@/hooks/useSquadDashboard";
 import { useSquadReports, useSquadOverrides } from "@/hooks/useSquadReports";
@@ -50,9 +50,13 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
   const [editModal, setEditModal] = useState<EditModal | null>(null);
   const [editSaving, setEditSaving] = useState(false);
 
-  const realData = weeklyData.filter((w) => w.aFazer > 0 || w.entradas > 0 || w.saidas > 0);
-  const projectionData = weeklyData.filter((w) => w.melhorCenario !== undefined);
-  const burndownData = [...realData.map(w => ({ ...w })), ...projectionData];
+  // Separate burndown data (has aFazer or projection) from weekly performance data
+  const burndownData = weeklyData.filter(
+    (w) => w.aFazer !== null || w.melhorCenario !== undefined
+  );
+  const performanceData = weeklyData.filter(
+    (w) => w.aFazer === null && w.melhorCenario === undefined && (w.vazaoTotal > 0 || w.entradas > 0 || w.transbordos > 0)
+  );
 
   const handleBarClick = useCallback((data: any) => {
     if (data?.activePayload?.[0]?.payload) {
@@ -102,7 +106,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 4 }}>
         <MetricCard label="Escopo Total" value={kpis.escopo} unit="itens" accent={accent} small />
         <MetricCard label="Entregas" value={kpis.entregas} unit="itens" accent="#2A6B50" small />
-        <MetricCard label="WIP" value={kpis.wip} unit="itens" accent={kpis.wip > 10 ? "#9E3D2B" : "#0f1729"} small />
+        <MetricCard label="WIP (A Fazer)" value={kpis.wip} unit="itens" accent={kpis.wip > 10 ? "#9E3D2B" : "#0f1729"} small />
         <MetricCard label="Lead Time" value={kpis.leadTime} unit="dias" small />
       </div>
 
@@ -115,58 +119,60 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
             <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
             <YAxis tick={{ fontSize: 9 }} stroke="#999" />
             <Tooltip contentStyle={{ fontSize: 11, background: "#fff", color: "#1a1d23", border: "1px solid #e0dcd7", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,.1)" }} />
-            <Area type="monotone" dataKey="aFazer" name="A Fazer (Real)" stroke={accent} fill={accent} fillOpacity={0.15} strokeWidth={2} />
-            <Area type="monotone" dataKey="melhorCenario" name="Melhor Cenário" stroke="#2A6B50" fill="#2A6B50" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
-            <Area type="monotone" dataKey="piorCenario" name="Pior Cenário" stroke="#9E3D2B" fill="#9E3D2B" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
+            <Area type="monotone" dataKey="aFazer" name="A Fazer (Real)" stroke={accent} fill={accent} fillOpacity={0.15} strokeWidth={2} connectNulls={false} />
+            <Area type="monotone" dataKey="melhorCenario" name="Melhor Cenário (3/sem)" stroke="#2A6B50" fill="#2A6B50" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
+            <Area type="monotone" dataKey="piorCenario" name="Pior Cenário (1/sem)" stroke="#9E3D2B" fill="#9E3D2B" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
             <Area type="monotone" dataKey="tendencia" name="Tendência" stroke="#c9a84c" fill="none" strokeWidth={1.5} strokeDasharray="3 3" />
             <Legend wrapperStyle={{ fontSize: 9 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Itens Planejados vs Não Planejados */}
-      {sectionLabel("Itens Planejados vs Não Planejados", "#7B5EA7")}
+      {/* Throughput Mensurado (same as Vercel) */}
+      {sectionLabel("Throughput Mensurado", "#7B5EA7")}
       <div style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.45)", marginBottom: 8, marginTop: -8, lineHeight: 1.4 }}>
         Planejado = criado antes da semana e resolvido nela &nbsp;|&nbsp; Não Planejado = criado e resolvido na mesma semana
       </div>
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px", marginBottom: 4 }}>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} onClick={handleBarClick}>
+          <BarChart data={performanceData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} onClick={handleBarClick}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
-            <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
+            <XAxis dataKey="week" tick={{ fontSize: 8 }} stroke="#999" angle={-45} textAnchor="end" height={50} />
             <YAxis tick={{ fontSize: 9 }} stroke="#999" />
             <Tooltip content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
               const total = (d?.planejadas || 0) + (d?.naoPlanejadas || 0);
+              const pct = total > 0 ? Math.round((d?.planejadas / total) * 100) : 0;
               return (
                 <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
-                  <div style={{ color: "#2A6B50" }}>✓ Planejados: {d?.planejadas || 0}</div>
-                  <div style={{ color: "#9E7B00" }}>⚡ Não Planejados: {d?.naoPlanejadas || 0}</div>
+                  <div style={{ color: "#2A6B50" }}>✓ Planejadas: {d?.planejadas || 0}</div>
+                  <div style={{ color: "#9E7B00" }}>⚡ Não Planejadas: {d?.naoPlanejadas || 0}</div>
                   <div style={{ borderTop: "1px solid #e0dcd7", marginTop: 4, paddingTop: 4 }}>
-                    Total: {total} &nbsp;·&nbsp; Taxa: {d?.percentPlanejado || 0}%
+                    Vazão Total: {total} &nbsp;·&nbsp; Taxa: {pct}%
                   </div>
+                  {d?.leadTime > 0 && <div>Lead Time: {d.leadTime} dias</div>}
                 </div>
               );
             }} />
-            <Bar dataKey="planejadas" name="Planejados" stackId="plan" fill="#2A6B50" fillOpacity={0.75} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="naoPlanejadas" name="Não Planejados" stackId="plan" fill="#c9a84c" fillOpacity={0.75} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="planejadas" name="Planejadas" stackId="plan" fill="#2A6B50" fillOpacity={0.75} />
+            <Bar dataKey="naoPlanejadas" name="Não Planejadas" stackId="plan" fill="#c9a84c" fillOpacity={0.75} radius={[2, 2, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 9 }} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Vazão e Lead Time */}
-      {sectionLabel("Vazão e Lead Time", "#2A6B50")}
+      {/* Balanço do Fluxo (Delta) — same as Vercel */}
+      {sectionLabel("Balanço do Fluxo (Delta)", "#2A6B50")}
       <div style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.45)", marginBottom: 8, marginTop: -8, lineHeight: 1.4 }}>
-        Vazão = itens resolvidos na semana &nbsp;|&nbsp; Lead Time = tempo médio de resolução (dias)
+        Entradas = itens criados na semana &nbsp;|&nbsp; Saídas = itens resolvidos na semana
       </div>
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px" }}>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+          <BarChart data={performanceData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
-            <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
+            <XAxis dataKey="week" tick={{ fontSize: 8 }} stroke="#999" angle={-45} textAnchor="end" height={50} />
             <YAxis tick={{ fontSize: 9 }} stroke="#999" />
             <Tooltip content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
@@ -174,13 +180,17 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
               return (
                 <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
-                  <div style={{ color: "#2A6B50" }}>Vazão: {d?.vazaoTotal || 0} itens</div>
-                  <div style={{ color: "#9E3D2B" }}>Lead Time: {d?.leadTime || 0} dias</div>
+                  <div style={{ color: "#7B5EA7" }}>Demandas Criadas: {d?.entradas || 0}</div>
+                  <div style={{ color: "#2A6B50" }}>Entregas Feitas: {d?.saidas || 0}</div>
+                  <div style={{ borderTop: "1px solid #e0dcd7", marginTop: 4, paddingTop: 4, color: (d?.saldo || 0) > 0 ? "#9E3D2B" : "#2A6B50" }}>
+                    Saldo: {(d?.saldo || 0) > 0 ? "+" : ""}{d?.saldo || 0}
+                  </div>
+                  {d?.transbordos > 0 && <div>Transbordos: {d.transbordos}</div>}
                 </div>
               );
             }} />
-            <Bar dataKey="vazaoTotal" name="Vazão (itens)" fill="#2A6B50" fillOpacity={0.7} radius={[2, 2, 0, 0]} />
-            <Bar dataKey="leadTime" name="Lead Time (dias)" fill="#9E3D2B" fillOpacity={0.6} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="entradas" name="Demandas Criadas" fill="#7B5EA7" fillOpacity={0.7} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="saidas" name="Entregas Feitas" fill="#2A6B50" fillOpacity={0.7} radius={[2, 2, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 9 }} />
           </BarChart>
         </ResponsiveContainer>
