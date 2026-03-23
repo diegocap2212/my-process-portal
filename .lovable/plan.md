@@ -1,48 +1,52 @@
 
 
-## Plano: Alinhar dados do portal com o dashboard da Vercel
+## Plano: Alinhar cálculos do portal com o dashboard Vercel
 
-### Problema identificado
+### Problema raiz
 
-Os gráficos do portal mostram **zeros** porque existem dois desalinhamentos entre os dados reais (data.json do GitHub) e a lógica do portal:
+Analisei o código-fonte do dashboard Vercel (`useDashboardData.ts`) e comparei com o portal. Existem 4 diferenças fundamentais na lógica de cálculo que causam divergência nos números:
 
-1. **Mapeamento de times incorreto**: O `JIRA_TEAM_TO_SQUAD` mapeia times como "SCANIA S 650", "TAOS", "GOL", "NIVUS", "OPTIMUS" — mas os dados reais do Jira usam nomes como **UP, AMAROK, TERA, GOL, PARATI, TIGUAN, RESSARCIMENTO**, entre outros. A maioria dos itens cai no time "UP" e não é associada a nenhum squad.
+### Diferenças encontradas
 
-2. **Parsing de datas**: O `parseExcelDate` espera números seriais do Excel (ex: "46084.45"), mas dependendo do momento os dados podem chegar como strings formatadas ("03/03/2026 10:55"). A função precisa lidar com ambos os formatos.
+| Aspecto | Vercel | Portal | Impacto |
+|---------|--------|--------|---------|
+| **Parsing de datas** | `(serial - 25569) * 86400 * 1000` | `epoch(1899,11,30) + serial * 86400000` | Equivalente, OK |
+| **Status** | `Status.toUpperCase()` na normalização | Case-sensitive, checa "DESCARTADO" e "Descartado" | Itens "descartado" podem escapar |
+| **Burndown "A Fazer"** | Cumulativo: `scope_até_semana - resolved_até_semana` | Point-in-time: itens criados antes e não resolvidos antes | Pode divergir em edge cases |
+| **Projeção cone** | Velocity = `totalEntregas / totalSemanas` desde primeira entrega, 20 semanas | Velocity = média últimas 4 semanas, 8 semanas | Velocidades e alcance diferentes |
+| **Throughput** | "Planejadas" vs "Não Planejadas" + "Vazão Total" + "Lead Time (Méd)" | "Criados" vs "Resolvidos" | Métricas diferentes |
+| **Balanço do Fluxo** | "Entradas" vs "Saídas" = "Saldo" (delta) | "Criados" vs "Resolvidos" | Mesmo conceito, labels diferentes |
+| **Histórico** | Todas as semanas desde o primeiro item | Últimas 12 semanas apenas | Gráfico muito mais curto |
 
-### O que muda
+### O que será alterado
 
 | Arquivo | Mudança |
 |---------|---------|
-| `src/services/metricsCalculator.ts` | Atualizar `parseExcelDate` para aceitar **ambos os formatos** (serial Excel e string "dd/MM/yyyy HH:mm"). Atualizar `JIRA_TEAM_TO_SQUAD` com os times reais do data.json |
-| `src/data/squads.ts` | Atualizar `SM_SQUAD_DETAILS` para refletir os squads reais associados a cada SM |
-| `src/data/cone-mock.ts` | Atualizar mock data com os nomes corretos dos squads |
+| `src/services/metricsCalculator.ts` | Normalizar `Status.toUpperCase()` no parsing |
+| `src/hooks/useSquadDashboard.ts` | (1) Calcular "A Fazer" cumulativo como Vercel. (2) Projeção cone com velocity = totalEntregas/totalSemanas e 20 semanas. (3) Histórico dinâmico desde primeiro item (não fixo 12 semanas). (4) Throughput com Planejadas/Não Planejadas. (5) Balanço com Entradas/Saídas/Saldo |
+| `src/components/wow-v2/SquadDashboard.tsx` | Atualizar gráficos para usar as novas séries (Planejadas, Não Planejadas, Entradas, Saídas, Saldo) |
 
-### Mapeamento proposto
+### Detalhes técnicos
 
-Preciso da sua confirmação sobre qual time do Jira pertence a qual SM/squad. Baseado nos dados atuais, os times encontrados são:
-
-```text
-Times no Jira (data.json):
-  UP, AMAROK, TERA, GOL, PARATI, TIGUAN, RESSARCIMENTO
-  + vários itens sem time (Team: "")
+**Burndown cumulativo** (alinhado com Vercel):
+```
+scope_na_semana = itens criados até fim da semana
+resolved_na_semana = itens resolvidos até fim da semana
+aFazer = scope - resolved
 ```
 
-Dois projetos Jira coexistem: **WA-** (Blip/WhatsApp) e **RM-** (outros).
+**Velocity do cone** (alinhado com Vercel):
+```
+velocity = totalEntregas / semanas_desde_primeira_entrega
+```
 
-**Preciso que você me confirme o mapeamento correto:**
-- Edmilson cuida de quais times?
-- Gabriela cuida de quais times?
-- Rafael cuida de quais times?
+**Throughput** (alinhado com Vercel):
+- Planejadas: resolvidas na semana que foram criadas antes daquela semana
+- Não Planejadas: resolvidas na semana que foram criadas naquela mesma semana
+- Lead Time médio por semana
 
-Isso é essencial para que os gráficos por squad mostrem os dados corretos.
-
-### Lógica dos gráficos (mantida igual ao Vercel)
-
-Os gráficos que já temos (Burndown, Throughput, Balanço do Fluxo) seguem a mesma lógica do dashboard Vercel:
-- **Burndown**: "A Fazer" real + projeção cone (melhor 3/sem, pior 1/sem, tendência baseada na velocidade real)
-- **Throughput**: Vazão semanal + Lead Time médio
-- **Balanço**: Criados vs Resolvidos por semana
-
-A lógica de cálculo já está alinhada — o problema é puramente de **mapeamento de times** e **parsing de datas**.
+**Balanço do Fluxo** (alinhado com Vercel):
+- Entradas (inflow): itens criados na semana
+- Saídas: itens resolvidos na semana
+- Saldo: Entradas - Saídas
 
