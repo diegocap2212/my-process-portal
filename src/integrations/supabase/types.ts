@@ -80,6 +80,63 @@ export type Database = {
         }
         Relationships: []
       }
+      squad_data_overrides: {
+        Row: {
+          created_at: string
+          field: string
+          id: string
+          sm: string
+          squad: string
+          value: number
+          week: string
+        }
+        Insert: {
+          created_at?: string
+          field: string
+          id?: string
+          sm: string
+          squad: string
+          value: number
+          week: string
+        }
+        Update: {
+          created_at?: string
+          field?: string
+          id?: string
+          sm?: string
+          squad?: string
+          value?: number
+          week?: string
+        }
+        Relationships: []
+      }
+      squad_reports: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string
+          sm: string
+          squad: string
+          week: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string
+          sm: string
+          squad: string
+          week: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string
+          sm?: string
+          squad?: string
+          week?: string
+        }
+        Relationships: []
+      }
       weekly_reports: {
         Row: {
           created_at: string
