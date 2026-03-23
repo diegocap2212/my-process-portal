@@ -6,6 +6,7 @@ import { calculateMetrics, type JiraItem } from "@/services/metricsCalculator";
 
 interface UseConeDataResult {
   data: Record<string, Record<string, SquadConeData>>;
+  rawItems: JiraItem[];
   loading: boolean;
   error: string | null;
   isLive: boolean;
@@ -13,6 +14,7 @@ interface UseConeDataResult {
 
 export function useConeData(): UseConeDataResult {
   const [data, setData] = useState<Record<string, Record<string, SquadConeData>>>(CONE_MOCK_DATA);
+  const [rawItems, setRawItems] = useState<JiraItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
@@ -36,6 +38,7 @@ export function useConeData(): UseConeDataResult {
 
         const metrics = calculateMetrics(items);
         setData(metrics);
+        setRawItems(items);
         setIsLive(true);
         setError(null);
       } catch (err) {
@@ -54,7 +57,7 @@ export function useConeData(): UseConeDataResult {
     return () => { cancelled = true; };
   }, []);
 
-  return { data, loading, error, isLive };
+  return { data, rawItems, loading, error, isLive };
 }
 
 // Re-export helpers that work with any data shape

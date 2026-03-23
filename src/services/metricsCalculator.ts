@@ -12,20 +12,36 @@ export interface JiraItem {
 }
 
 // Excel serial number → JS Date
-function excelSerialToDate(serial: number): Date {
+export function excelSerialToDate(serial: number): Date {
   const epoch = new Date(1899, 11, 30); // Excel epoch
   return new Date(epoch.getTime() + serial * 86400000);
 }
 
-function parseExcelDate(val: string | null): Date | null {
+export function parseExcelDate(val: string | null): Date | null {
   if (!val) return null;
   const num = parseFloat(val);
   if (isNaN(num)) return null;
   return excelSerialToDate(num);
 }
 
+// Get Monday of a given date's week
+export function getMonday(d: Date): Date {
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d);
+  mon.setDate(diff);
+  mon.setHours(0, 0, 0, 0);
+  return mon;
+}
+
+export function formatWeekLabel(d: Date): string {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}`;
+}
+
 // Team name from Jira → { sm, squad }
-const TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
+export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },
   TAOS: { sm: "Gabriela", squad: "Taos" },
   GOL: { sm: "Gabriela", squad: "Canal Indireto" },
@@ -52,7 +68,7 @@ export function calculateMetrics(
   const bySquad: Record<string, { sm: string; squad: string; items: JiraItem[] }> = {};
 
   for (const item of items) {
-    const mapping = TEAM_TO_SQUAD[item.Team];
+    const mapping = JIRA_TEAM_TO_SQUAD[item.Team];
     if (!mapping) continue;
     const key = `${mapping.sm}::${mapping.squad}`;
     if (!bySquad[key]) bySquad[key] = { ...mapping, items: [] };
@@ -101,7 +117,7 @@ export function calculateMetrics(
   }
 
   // Ensure all known squads appear even if no data
-  for (const [team, mapping] of Object.entries(TEAM_TO_SQUAD)) {
+  for (const [team, mapping] of Object.entries(JIRA_TEAM_TO_SQUAD)) {
     if (!result[mapping.sm]) result[mapping.sm] = {};
     if (!result[mapping.sm][mapping.squad]) {
       result[mapping.sm][mapping.squad] = {
