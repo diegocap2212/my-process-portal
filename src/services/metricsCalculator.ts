@@ -28,6 +28,7 @@ function parseExcelDate(val: string | null): Date | null {
 const TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },
   TAOS: { sm: "Gabriela", squad: "Taos" },
+  GOL: { sm: "Gabriela", squad: "Canal Indireto" },
   NIVUS: { sm: "Rafael", squad: "Nivus" },
   OPTIMUS: { sm: "Rafael", squad: "Optimus" },
 };
