@@ -1,76 +1,59 @@
 
 
-## WoW v2 Completo — Abas de Referência + Dados Reais do Cone via SharePoint
+## Integração SharePoint — Plano de Implementação
 
-### O que será feito
+### Situação atual
+- Azure AD configurado: Client ID `966e1a2e...`, Tenant ID `8f13a14b...`, Client Secret recebido
+- Projeto **não tem Supabase/Lovable Cloud** configurado — preciso ativar para criar Edge Functions
+- Mock data em `src/data/cone-mock.ts` já tem a interface `SquadConeData` pronta
 
-**Frente 1** — Trazer as 4 abas de referência do WoW v1 (Framework, Cadências, Papel & Regras, Padrões) para dentro do WoW v2, criando uma experiência unificada.
+### Pré-requisitos antes de codar
 
-**Frente 2** — Conectar o WoW v2 ao Excel do SharePoint (via conector Microsoft OneDrive) para puxar vazão, lead time, escopo e dados do cone automaticamente, substituindo o mock.
+**1. Ativar Lovable Cloud** — necessário para Edge Functions. Vou ativar na implementação.
 
-### Frente 1 — Abas de referência no WoW v2
+**2. Armazenar 3 secrets no projeto:**
+- `AZURE_TENANT_ID` = `8f13a14b-e674-447f-93e0-812f6809af2f`
+- `AZURE_CLIENT_ID` = `966e1a2e-781a-40b1-b4b1-d6991bc9906f`
+- `AZURE_CLIENT_SECRET` = o valor que você enviou
 
-**Arquivo: `src/pages/WoWV2.tsx`**
+**3. Informação pendente do usuário:**
+- **Nome do site SharePoint** (ex: `TorreLM`, `Locavia`)
+- **Path do arquivo Excel** dentro do SharePoint (ex: `Documents/metricas.xlsx`)
+- **Nome da aba/planilha** que contém os dados do cone (vazão, cycle time, etc.)
+- **Estrutura das colunas** — quais colunas mapeiam para vazão, cycleTime, p85, acimP85, cone
 
-Expandir o array `TABS` com separador visual:
-
-```text
-Operacional:  Report SM (◉) | Visão SDM (◎) | Histórico (↻)
-              ──── separador visual ────
-Referência:   Framework (◯) | Cadências (↻) | Papel (◎) | Padrões (◆)
-```
-
-Mudanças:
-- Importar `FrameworkTab`, `CadenciasTab`, `PapelTab`, `PadroesTab`
-- Adicionar state `exp` (para accordion das cadências)
-- Renderizar os componentes existentes nas novas abas
-- Ajustar o `FrameworkTab` para que os links internos (`setTab("cadencias")`) funcionem no contexto v2
-- Separador visual entre os dois grupos de tabs (linha vertical ou espaço maior)
-- Tabs de referência com estilo mais sutil (opacidade menor quando inativas)
-
-Nenhum componente novo precisa ser criado — todos já existem e funcionam.
-
-### Frente 2 — Dados reais do SharePoint
-
-O Excel no SharePoint contém os dados que alimentam o Locavia Dashboard (vazão, lead time, escopo, entregas). Para trazer esses dados para o WoW v2:
-
-**Passo 1 — Conectar Microsoft OneDrive**
-Usar o conector `microsoft_onedrive` (se disponível) ou conector SharePoint para acessar o arquivo Excel programaticamente.
-
-**Passo 2 — Edge Function para ler o Excel**
-Criar `supabase/functions/read-sharepoint-data/index.ts`:
-- Autentica via conector
-- Lê o arquivo Excel do SharePoint usando a Microsoft Graph API (`/drives/{id}/items/{id}/workbook/worksheets/{name}/range`)
-- Retorna JSON com os dados de vazão, cycle time, lead time, escopo por squad/time
-- Cache de 1h para não bater na API a cada load
-
-**Passo 3 — Hook no frontend**
-Criar `src/hooks/useConeData.ts`:
-- Chama a edge function
-- Faz parse dos dados para a mesma interface `SquadConeData` que o mock usa
-- Fallback para `cone-mock.ts` se a API falhar
-
-**Passo 4 — Substituir mock nos componentes**
-- `SmReportTab.tsx` e `SdmTab.tsx` passam a usar `useConeData()` em vez de `CONE_MOCK_DATA`
-- Mesma interface, mesma UI, dados reais
-
-**Dependência**: Preciso que você conecte o SharePoint/OneDrive via conector quando eu pedir. Também vou precisar saber:
-- O nome/path do arquivo Excel no SharePoint
-- Quais abas/colunas contêm os dados (vazão, lead time, etc.)
-
-### Arquivos
+### Implementação técnica
 
 | Ação | Arquivo |
 |------|---------|
-| Editar | `src/pages/WoWV2.tsx` — adicionar 4 tabs de referência + state `exp` |
-| Novo | `supabase/functions/read-sharepoint-data/index.ts` — lê Excel via Graph API |
-| Novo | `src/hooks/useConeData.ts` — hook que consome a edge function |
-| Editar | `src/components/wow-v2/SmReportTab.tsx` — usar `useConeData` em vez de mock |
-| Editar | `src/components/wow-v2/SdmTab.tsx` — usar `useConeData` em vez de mock |
+| Novo | `supabase/functions/read-sharepoint-data/index.ts` — Edge Function |
+| Novo | `src/hooks/useConeData.ts` — Hook que consome a Edge Function |
+| Editar | `src/components/wow-v2/SmReportTab.tsx` — Trocar mock por dados reais |
+| Editar | `src/components/wow-v2/SdmTab.tsx` — Trocar mock por dados reais |
 
-### Ordem de implementação
-1. Abas de referência no v2 (rápido, sem dependência externa)
-2. Conectar SharePoint/OneDrive (precisa do conector)
-3. Edge function + hook para dados reais
-4. Substituir mock nos componentes
+**Edge Function** (`read-sharepoint-data`):
+- Autentica no Azure AD via client credentials flow (`https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token`)
+- Usa Microsoft Graph API para ler o Excel (`/sites/{siteId}/drive/items/{itemId}/workbook/worksheets/{sheet}/usedRange`)
+- Faz parse das linhas para o formato `SquadConeData`
+- Cache de 1h via header `Cache-Control`
+- CORS headers para chamadas do frontend
+
+**Hook** (`useConeData`):
+- Chama a Edge Function via `supabase.functions.invoke('read-sharepoint-data')`
+- Retorna dados na mesma interface `Record<string, Record<string, SquadConeData>>`
+- Fallback automático para `CONE_MOCK_DATA` se a API falhar
+- Estado de loading/error
+
+**Componentes** (SmReportTab + SdmTab):
+- Substituir imports diretos de `CONE_MOCK_DATA` por `useConeData()`
+- Mesma UI, mesma lógica, dados reais
+
+### Próximo passo imediato
+
+Antes de implementar, preciso que você me diga:
+1. O **nome do site SharePoint** onde está o Excel
+2. O **nome/path do arquivo** Excel
+3. A **aba da planilha** e **estrutura das colunas** (quais colunas = vazão, cycle time, p85, etc.)
+
+Sem isso, a Edge Function não sabe onde buscar os dados. Posso criar a estrutura inteira com placeholder e você ajusta depois, ou podemos mapear agora.
 
