@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      reports: {
+        Row: {
+          acoes: string
+          cone: boolean | null
+          cone_text: string
+          created_at: string
+          date: string
+          id: string
+          images: Json
+          o_que: string
+          parado: boolean | null
+          parado_text: string
+          pdti: boolean | null
+          pdti_text: string
+          problemas: string
+          sm: string
+          squad: string
+          wip_epic: boolean | null
+          wip_epic_text: string
+          wip_us: boolean | null
+          wip_us_text: string
+        }
+        Insert: {
+          acoes?: string
+          cone?: boolean | null
+          cone_text?: string
+          created_at?: string
+          date: string
+          id?: string
+          images?: Json
+          o_que?: string
+          parado?: boolean | null
+          parado_text?: string
+          pdti?: boolean | null
+          pdti_text?: string
+          problemas?: string
+          sm: string
+          squad: string
+          wip_epic?: boolean | null
+          wip_epic_text?: string
+          wip_us?: boolean | null
+          wip_us_text?: string
+        }
+        Update: {
+          acoes?: string
+          cone?: boolean | null
+          cone_text?: string
+          created_at?: string
+          date?: string
+          id?: string
+          images?: Json
+          o_que?: string
+          parado?: boolean | null
+          parado_text?: string
+          pdti?: boolean | null
+          pdti_text?: string
+          problemas?: string
+          sm?: string
+          squad?: string
+          wip_epic?: boolean | null
+          wip_epic_text?: string
+          wip_us?: boolean | null
+          wip_us_text?: string
+        }
+        Relationships: []
+      }
+      weekly_reports: {
+        Row: {
+          created_at: string
+          id: string
+          q1: string
+          q2: string
+          q3: string
+          sm: string
+          week: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          q1?: string
+          q2?: string
+          q3?: string
+          sm: string
+          week: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          q1?: string
+          q2?: string
+          q3?: string
+          sm?: string
+          week?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
