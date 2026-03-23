@@ -116,7 +116,7 @@ export function useSquadDashboard(
 
     const weeklyData: WeekPoint[] = weeks.map((weekStart, idx) => {
       const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
-      const label = formatWeekLabel(weekStart);
+      const label = formatWeekRange(weekStart);
 
       // Burndown cumulativo (como Vercel): scope até semana - resolved até semana
       const scopeAtWeek = parsed.filter(
