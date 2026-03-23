@@ -45,7 +45,7 @@ export function calculateMetrics(
   items: JiraItem[]
 ): Record<string, Record<string, SquadConeData>> {
   const now = new Date();
-  const oneWeekAgo = new Date(now.getTime() - 7 * 86400000);
+  const fourWeeksAgo = new Date(now.getTime() - 28 * 86400000);
 
   // Group items by squad
   const bySquad: Record<string, { sm: string; squad: string; items: JiraItem[] }> = {};
@@ -72,13 +72,14 @@ export function calculateMetrics(
       if (cycleDays >= 0) resolvedWithCycle.push({ resolved, cycleDays });
     }
 
-    // Vazão: resolved in last 7 days
-    const vazao = resolvedWithCycle.filter(
-      (r) => r.resolved >= oneWeekAgo
-    ).length;
+    // Vazão: resolved in last 4 weeks
+    const recentResolved = resolvedWithCycle.filter(
+      (r) => r.resolved >= fourWeeksAgo
+    );
+    const vazao = recentResolved.length;
 
-    // Cycle times
-    const cycleTimes = resolvedWithCycle.map((r) => r.cycleDays).sort((a, b) => a - b);
+    // Cycle times from last 4 weeks
+    const cycleTimes = recentResolved.map((r) => r.cycleDays).sort((a, b) => a - b);
     const avgCycle = cycleTimes.length > 0
       ? +(cycleTimes.reduce((s, v) => s + v, 0) / cycleTimes.length).toFixed(1)
       : 0;
@@ -86,9 +87,7 @@ export function calculateMetrics(
     const p85 = cycleTimes.length > 0 ? +percentile(cycleTimes, 85).toFixed(1) : 0;
 
     const acimP85 = p85 > 0
-      ? resolvedWithCycle.filter(
-          (r) => r.resolved >= oneWeekAgo && r.cycleDays > p85
-        ).length
+      ? recentResolved.filter((r) => r.cycleDays > p85).length
       : 0;
 
     // Cone: simple heuristic
