@@ -43,10 +43,10 @@ const SdmTab: React.FC = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
         {SM_NAMES.map((sm) => {
-          const totals = getSmTotals(sm);
+          const totals = getSmTotalsFromData(coneData, sm);
           const report = getLatestReport(sm);
           const squads = SM_SQUAD_DETAILS[sm] || [];
-          const smData = CONE_MOCK_DATA[sm] || {};
+          const smData = coneData[sm] || {};
 
           return (
             <div key={sm} style={{
