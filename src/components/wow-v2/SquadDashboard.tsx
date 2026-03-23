@@ -114,7 +114,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
             <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
             <YAxis tick={{ fontSize: 9 }} stroke="#999" />
-            <Tooltip contentStyle={{ fontSize: 11, background: "#0f1729", color: "#fff", border: "none", borderRadius: 4 }} />
+            <Tooltip contentStyle={{ fontSize: 11, background: "#fff", color: "#1a1d23", border: "1px solid #e0dcd7", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,.1)" }} />
             <Area type="monotone" dataKey="aFazer" name="A Fazer (Real)" stroke={accent} fill={accent} fillOpacity={0.15} strokeWidth={2} />
             <Area type="monotone" dataKey="melhorCenario" name="Melhor Cenário" stroke="#2A6B50" fill="#2A6B50" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
             <Area type="monotone" dataKey="piorCenario" name="Pior Cenário" stroke="#9E3D2B" fill="#9E3D2B" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
