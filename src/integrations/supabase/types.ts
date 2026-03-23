@@ -87,6 +87,7 @@ export type Database = {
           q1: string
           q2: string
           q3: string
+          q4: string
           sm: string
           week: string
         }
@@ -96,6 +97,7 @@ export type Database = {
           q1?: string
           q2?: string
           q3?: string
+          q4?: string
           sm: string
           week: string
         }
@@ -105,6 +107,7 @@ export type Database = {
           q1?: string
           q2?: string
           q3?: string
+          q4?: string
           sm?: string
           week?: string
         }

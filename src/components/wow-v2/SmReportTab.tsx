@@ -13,6 +13,7 @@ const SmReportTab: React.FC = () => {
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
+  const [q4, setQ4] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const { submitWeeklyReport } = useWeeklyReports();
@@ -21,10 +22,10 @@ const SmReportTab: React.FC = () => {
   const week = getCurrentWeek();
 
   const handleSubmit = async () => {
-    if (!q1.trim() && !q2.trim() && !q3.trim()) return;
+    if (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) return;
     setSubmitting(true);
-    const ok = await submitWeeklyReport({ sm: selectedSm, week, q1, q2, q3 });
-    if (ok) { setQ1(""); setQ2(""); setQ3(""); }
+    const ok = await submitWeeklyReport({ sm: selectedSm, week, q1, q2, q3, q4 });
+    if (ok) { setQ1(""); setQ2(""); setQ3(""); setQ4(""); }
     setSubmitting(false);
   };
 
@@ -35,7 +36,7 @@ const SmReportTab: React.FC = () => {
         {SM_NAMES.map((sm) => (
           <div
             key={sm}
-            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); }}
+            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); setQ4(""); }}
             style={{
               padding: "6px 14px",
               fontSize: 11,
@@ -106,6 +107,7 @@ const SmReportTab: React.FC = () => {
           { n: "①", label: "O que você tracionou que os números não mostram?", val: q1, set: setQ1, ph: "Desbloqueios, facilitações, alinhamentos, decisões que você conduziu..." },
           { n: "②", label: "Algo travado que precisa de escalação?", val: q2, set: setQ2, ph: "Se não tem nada travado, deixe em branco. Se tem, diga o quê e em qual squad." },
           { n: "③", label: "Alguma entrega que deveria virar narrativa pro cliente?", val: q3, set: setQ3, ph: "Desbloqueio, entrega, resultado que tem potencial de virar munição executiva..." },
+          { n: "④", label: "Acompanhamento", val: q4, set: setQ4, ph: "Temas livres, anotações, pontos para condensar ao longo do tempo..." },
         ].map(({ n, label, val, set, ph }) => (
           <div key={n}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
@@ -125,12 +127,12 @@ const SmReportTab: React.FC = () => {
 
       <button
         onClick={handleSubmit}
-        disabled={submitting || (!q1.trim() && !q2.trim() && !q3.trim())}
+        disabled={submitting || (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim())}
         style={{
           width: "100%", padding: "12px", background: submitting ? "#555" : "#0f1729",
           color: "#fff", border: "none", fontFamily: "'IBM Plex Mono',monospace",
           fontSize: 11, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
-          cursor: submitting ? "wait" : "pointer", opacity: (!q1.trim() && !q2.trim() && !q3.trim()) ? 0.4 : 1,
+          cursor: submitting ? "wait" : "pointer", opacity: (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) ? 0.4 : 1,
         }}
       >
         {submitting ? "Salvando..." : "Enviar report da semana"}

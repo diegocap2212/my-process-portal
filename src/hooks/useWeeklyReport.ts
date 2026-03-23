@@ -9,6 +9,7 @@ export interface WeeklyReport {
   q1: string;
   q2: string;
   q3: string;
+  q4: string;
   created_at: string;
 }
 
@@ -18,6 +19,7 @@ export interface WeeklyReportInput {
   q1: string;
   q2: string;
   q3: string;
+  q4: string;
 }
 
 function getCurrentWeek(): string {
@@ -69,6 +71,7 @@ export function useWeeklyReports() {
         q1: input.q1.trim(),
         q2: input.q2.trim(),
         q3: input.q3.trim(),
+        q4: input.q4.trim(),
       });
 
       if (error) throw error;

@@ -1,0 +1,1 @@
+ALTER TABLE public.weekly_reports ADD COLUMN q4 TEXT NOT NULL DEFAULT '';
