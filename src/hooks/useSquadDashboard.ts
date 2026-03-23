@@ -118,9 +118,9 @@ export function useSquadDashboard(
       const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
       const label = formatWeekRange(weekStart);
 
-      // Burndown cumulativo (como Vercel): scope até semana - resolved até semana
+      // Burndown cumulativo (alinhado com Vercel): inclui DESCARTADO no scope
       const scopeAtWeek = parsed.filter(
-        (i) => i.createdDate && i.createdDate < weekEnd && i.Status !== "DESCARTADO"
+        (i) => i.createdDate && i.createdDate < weekEnd
       ).length;
       const resolvedAtWeek = parsed.filter(
         (i) => i.resolvedDate && i.resolvedDate < weekEnd
