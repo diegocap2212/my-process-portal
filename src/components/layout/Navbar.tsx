@@ -28,10 +28,6 @@ const Navbar: React.FC<NavbarProps> = ({ tab, setTab, onTabChange }) => {
       <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "rgba(255,255,255,.3)", ...fontMono }}>WoW</div>
       <div style={{ flex: 1 }} />
       <div
-        onClick={() => navigate("/dashboard")}
-        style={{ fontSize: 9, fontWeight: 600, padding: "3px 8px", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.25)", color: "#c9a84c", cursor: "pointer", ...fontMono, marginRight: 6 }}
-      >📊 DASHBOARD</div>
-      <div
         onClick={() => navigate("/v2")}
         style={{ fontSize: 9, fontWeight: 600, padding: "3px 8px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", color: "#c9a84c", cursor: "pointer", ...fontMono }}
       >◉ WoW v2</div>
