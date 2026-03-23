@@ -45,7 +45,7 @@ export function calculateMetrics(
   items: JiraItem[]
 ): Record<string, Record<string, SquadConeData>> {
   const now = new Date();
-  const oneWeekAgo = new Date(now.getTime() - 7 * 86400000);
+  const fourWeeksAgo = new Date(now.getTime() - 28 * 86400000);
 
   // Group items by squad
   const bySquad: Record<string, { sm: string; squad: string; items: JiraItem[] }> = {};
