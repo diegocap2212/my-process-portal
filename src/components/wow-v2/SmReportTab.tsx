@@ -126,12 +126,12 @@ const SmReportTab: React.FC = () => {
 
       <button
         onClick={handleSubmit}
-        disabled={submitting || (!q1.trim() && !q2.trim() && !q3.trim())}
+        disabled={submitting || (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim())}
         style={{
           width: "100%", padding: "12px", background: submitting ? "#555" : "#0f1729",
           color: "#fff", border: "none", fontFamily: "'IBM Plex Mono',monospace",
           fontSize: 11, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
-          cursor: submitting ? "wait" : "pointer", opacity: (!q1.trim() && !q2.trim() && !q3.trim()) ? 0.4 : 1,
+          cursor: submitting ? "wait" : "pointer", opacity: (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) ? 0.4 : 1,
         }}
       >
         {submitting ? "Salvando..." : "Enviar report da semana"}
