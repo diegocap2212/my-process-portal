@@ -5,7 +5,7 @@ import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
-import { useConeData, getSmTotalsFromData } from "@/hooks/useConeData";
+import { useConeData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
