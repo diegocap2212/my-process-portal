@@ -37,7 +37,8 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
   const week = getCurrentWeek();
   const { notes, setNotes, saveNotes, saving } = useSquadReports(sm, squadName, week);
   const { overrides, saveOverride } = useSquadOverrides(sm, squadName);
-  const { kpis, weeklyData } = useSquadDashboard(rawItems, squadName, sm, overrides);
+  const [selectedRelease, setSelectedRelease] = useState<string>("");
+  const { kpis, weeklyData, releases } = useSquadDashboard(rawItems, squadName, sm, overrides, selectedRelease || undefined);
 
   const [editModal, setEditModal] = useState<EditModal | null>(null);
   const [editSaving, setEditSaving] = useState(false);
