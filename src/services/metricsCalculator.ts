@@ -43,8 +43,8 @@ export function formatWeekLabel(d: Date): string {
 // Team name from Jira → { sm, squad }
 export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },
-  TAOS: { sm: "Gabriela", squad: "Taos" },
-  GOL: { sm: "Gabriela", squad: "Canal Indireto" },
+  TAOS: { sm: "Gabriela", squad: "Esteira de Crédito" },
+  GOL: { sm: "Gabriela", squad: "Portal Vendas Assistidas" },
   NIVUS: { sm: "Rafael", squad: "Nivus" },
   OPTIMUS: { sm: "Rafael", squad: "Optimus" },
 };
