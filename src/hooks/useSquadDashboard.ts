@@ -27,6 +27,7 @@ export interface WeekPoint {
 export interface SquadDashboardData {
   kpis: SquadKPIs;
   weeklyData: WeekPoint[];
+  releases: string[];
 }
 
 function getSquadTeams(squadName: string, sm: string): string[] {
@@ -39,14 +40,23 @@ export function useSquadDashboard(
   rawItems: JiraItem[],
   squadName: string,
   sm: string,
-  overrides?: SquadDataOverride[]
+  overrides?: SquadDataOverride[],
+  selectedRelease?: string
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
     const squadItems = rawItems.filter((item) => teams.includes(item.Team));
 
+    // Extract unique releases
+    const releases = Array.from(new Set(squadItems.map((i) => i.Release).filter(Boolean))).sort();
+
+    // Filter by release if selected
+    const filteredByRelease = selectedRelease
+      ? squadItems.filter((i) => i.Release === selectedRelease)
+      : squadItems;
+
     // Parse dates
-    const parsed = squadItems.map((item) => ({
+    const parsed = filteredByRelease.map((item) => ({
       ...item,
       createdDate: parseExcelDate(item.Created),
       resolvedDate: parseExcelDate(item.Resolved),
@@ -161,6 +171,7 @@ export function useSquadDashboard(
     return {
       kpis: { escopo, entregas, wip, leadTime },
       weeklyData,
+      releases,
     };
-  }, [rawItems, squadName, sm, overrides]);
+  }, [rawItems, squadName, sm, overrides, selectedRelease]);
 }

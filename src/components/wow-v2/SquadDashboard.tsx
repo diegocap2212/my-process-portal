@@ -37,7 +37,8 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
   const week = getCurrentWeek();
   const { notes, setNotes, saveNotes, saving } = useSquadReports(sm, squadName, week);
   const { overrides, saveOverride } = useSquadOverrides(sm, squadName);
-  const { kpis, weeklyData } = useSquadDashboard(rawItems, squadName, sm, overrides);
+  const [selectedRelease, setSelectedRelease] = useState<string>("");
+  const { kpis, weeklyData, releases } = useSquadDashboard(rawItems, squadName, sm, overrides, selectedRelease || undefined);
 
   const [editModal, setEditModal] = useState<EditModal | null>(null);
   const [editSaving, setEditSaving] = useState(false);
@@ -73,6 +74,27 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
       background: "#faf9f7", border: "1px solid #e0dcd7", borderTop: `3px solid ${accent}`,
       padding: "16px 20px", marginBottom: 16,
     }}>
+      {/* Release filter */}
+      {releases.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ ...fontMono, fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "rgba(26,29,35,.45)" }}>Release</span>
+          <select
+            value={selectedRelease}
+            onChange={(e) => setSelectedRelease(e.target.value)}
+            style={{
+              ...fontMono, fontSize: 10, padding: "4px 8px",
+              border: "1px solid #e0dcd7", background: "#fff",
+              color: "#1a1d23", cursor: "pointer",
+            }}
+          >
+            <option value="">Todas</option>
+            {releases.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 4 }}>
         <MetricCard label="Escopo Total" value={kpis.escopo} unit="itens" accent={accent} small />
