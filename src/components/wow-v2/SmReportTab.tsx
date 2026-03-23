@@ -106,6 +106,7 @@ const SmReportTab: React.FC = () => {
           { n: "①", label: "O que você tracionou que os números não mostram?", val: q1, set: setQ1, ph: "Desbloqueios, facilitações, alinhamentos, decisões que você conduziu..." },
           { n: "②", label: "Algo travado que precisa de escalação?", val: q2, set: setQ2, ph: "Se não tem nada travado, deixe em branco. Se tem, diga o quê e em qual squad." },
           { n: "③", label: "Alguma entrega que deveria virar narrativa pro cliente?", val: q3, set: setQ3, ph: "Desbloqueio, entrega, resultado que tem potencial de virar munição executiva..." },
+          { n: "④", label: "Acompanhamento", val: q4, set: setQ4, ph: "Temas livres, anotações, pontos para condensar ao longo do tempo..." },
         ].map(({ n, label, val, set, ph }) => (
           <div key={n}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
