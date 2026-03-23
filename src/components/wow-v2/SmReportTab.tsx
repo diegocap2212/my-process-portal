@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
-import MetricCard from "./MetricCard";
+
 import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
