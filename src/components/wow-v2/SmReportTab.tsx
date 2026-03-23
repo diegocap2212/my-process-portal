@@ -9,7 +9,7 @@ import { useConeData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
-  const [expandedSquad] = useState<string | null>(null);
+  
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
