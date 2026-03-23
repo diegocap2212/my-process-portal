@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
@@ -6,7 +6,6 @@ import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
-import { parseExcelDate } from "@/services/metricsCalculator";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
