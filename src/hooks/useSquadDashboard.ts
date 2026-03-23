@@ -40,11 +40,20 @@ export function useSquadDashboard(
   rawItems: JiraItem[],
   squadName: string,
   sm: string,
-  overrides?: SquadDataOverride[]
+  overrides?: SquadDataOverride[],
+  selectedRelease?: string
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
     const squadItems = rawItems.filter((item) => teams.includes(item.Team));
+
+    // Extract unique releases
+    const releases = Array.from(new Set(squadItems.map((i) => i.Release).filter(Boolean))).sort();
+
+    // Filter by release if selected
+    const filteredByRelease = selectedRelease
+      ? squadItems.filter((i) => i.Release === selectedRelease)
+      : squadItems;
 
     // Parse dates
     const parsed = squadItems.map((item) => ({
