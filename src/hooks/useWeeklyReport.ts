@@ -9,6 +9,7 @@ export interface WeeklyReport {
   q1: string;
   q2: string;
   q3: string;
+  q4: string;
   created_at: string;
 }
 
