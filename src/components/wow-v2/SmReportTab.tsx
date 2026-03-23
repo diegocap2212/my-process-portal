@@ -90,28 +90,39 @@ const SmReportTab: React.FC = () => {
           ))}
         </div>
         {Object.entries(smData).map(([squad, data], i) => (
-          <div key={squad} style={{
-            display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px",
-            padding: "10px 12px", borderBottom: i < Object.keys(smData).length - 1 ? "1px solid #f0ede8" : "none",
-            background: i % 2 === 1 ? "#fdfcfb" : "#fff",
-            alignItems: "center",
-          }}>
-            <div style={{ fontSize: 12, fontWeight: 500, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif" }}>
-              {squad}
-              {SM_SQUAD_DETAILS[selectedSm]?.find(s => s.name === squad)?.description && (
-                <span style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.35)", marginLeft: 6 }}>
-                  {SM_SQUAD_DETAILS[selectedSm].find(s => s.name === squad)!.description}
-                </span>
-              )}
+          <React.Fragment key={squad}>
+            <div
+              onClick={() => setExpandedSquad(expandedSquad === squad ? null : squad)}
+              style={{
+                display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px",
+                padding: "10px 12px", borderBottom: "1px solid #f0ede8",
+                background: expandedSquad === squad ? "#f5f3ef" : i % 2 === 1 ? "#fdfcfb" : "#fff",
+                alignItems: "center", cursor: "pointer", transition: "background .15s",
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 500, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 10, color: expandedSquad === squad ? smColors[selectedSm] : "#999", transition: "transform .2s", display: "inline-block", transform: expandedSquad === squad ? "rotate(90deg)" : "rotate(0)" }}>▶</span>
+                {squad}
+                {SM_SQUAD_DETAILS[selectedSm]?.find(s => s.name === squad)?.description && (
+                  <span style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.35)", marginLeft: 2 }}>
+                    {SM_SQUAD_DETAILS[selectedSm].find(s => s.name === squad)!.description}
+                  </span>
+                )}
+              </div>
+              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.vazao}</div>
+              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.cycleTime}d</div>
+              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.p85}d</div>
+              <div style={{ ...fontMono, fontSize: 12, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23", fontWeight: data.acimP85 > 0 ? 600 : 400 }}>
+                {data.acimP85}
+              </div>
+              <ConeStatus status={data.cone} />
             </div>
-            <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.vazao}</div>
-            <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.cycleTime}d</div>
-            <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.p85}d</div>
-            <div style={{ ...fontMono, fontSize: 12, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23", fontWeight: data.acimP85 > 0 ? 600 : 400 }}>
-              {data.acimP85}
-            </div>
-            <ConeStatus status={data.cone} />
-          </div>
+            {expandedSquad === squad && (
+              <div style={{ padding: "12px", borderBottom: "1px solid #e0dcd7" }}>
+                <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+              </div>
+            )}
+          </React.Fragment>
         ))}
       </div>
 
