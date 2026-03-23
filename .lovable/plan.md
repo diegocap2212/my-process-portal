@@ -1,50 +1,58 @@
 
 
-## Plano: Integrar Dados Reais via Google Sheets (Mesmo Fonte do Dashboard Vercel)
+## Plano: Integrar Dados Reais do SharePoint via Edge Function
 
-### Descoberta Importante
+### Entendimento Atualizado
 
-Analisei o código do `locavia-dashboard` no GitHub e descobri que ele **nao le diretamente do SharePoint**. Ele usa uma **URL de Google Sheets** como intermediário:
+O fluxo do dashboard Vercel é: **SharePoint Excel → sync diário → data.json local**. Os dados são itens Jira com colunas `Type, Key, Summary, Status, Team, Created, Resolved, Release`. O dashboard calcula métricas (vazão, cycle time, P85, cone) a partir desses dados brutos.
 
-```
-VITE_CLOUD_DATA_URL = "https://docs.google.com/spreadsheets/d/{id}/gviz/tq?tqx=out:json"
-```
+Nós já temos a Edge Function `read-sharepoint-data` que lê o Excel diretamente do SharePoint via Microsoft Graph API, com os secrets Azure configurados.
 
-Os dados sao itens Jira com colunas: `Type`, `Key`, `Summary`, `Status`, `Team`, `Created`, `Resolved`, `Release`. A partir disso, o dashboard calcula vazao, cycle time, lead time, WIP, projecao do cone (melhor/pior cenario), balanco de fluxo — tudo client-side.
+### Implementação
 
-### O que muda
+**1. Ajustar Edge Function `read-sharepoint-data`**
+- Já existe e lê o SharePoint Excel
+- Adicionar um modo `?mode=read&sheet=NOME_DA_ABA` que retorna os dados brutos como `JiraItem[]`
+- Precisamos descobrir qual aba contém os dados (a função já tem modo `discover` para listar abas)
 
-Podemos **abandonar a autenticacao Azure/SharePoint** e usar a mesma Google Sheets URL. Isso elimina o problema do Client Secret.
+**2. Criar `src/services/metricsCalculator.ts`**
+- Replica a lógica do `useDashboardData.ts` do Vercel:
+  - Parse de datas Excel (decimal → JS Date)
+  - **Vazão**: itens resolvidos na última semana por Team
+  - **Cycle Time**: média de `(Resolved - Created)` em dias por Team
+  - **P85**: percentil 85 do cycle time por Team
+  - **Itens >P85**: contagem de itens com cycle time acima do P85
+  - **Cone**: verde/amarelo/vermelho baseado na projeção (melhor cenário 3/sem, pior 1/sem)
+- Mapeia `Team` do Jira → SM/Squad usando `SM_SQUAD_DETAILS`
 
-### Informacao necessaria
+**3. Criar `src/hooks/useConeData.ts`**
+- Chama `supabase.functions.invoke('read-sharepoint-data', { body: { mode: 'read', sheet: '...' } })`
+- Passa os dados pelo `metricsCalculator`
+- Retorna `Record<string, Record<string, SquadConeData>>`
+- Fallback para `CONE_MOCK_DATA` se API falhar
+- Estados de loading/error
 
-Preciso que voce me envie a **URL do Google Sheets** que o dashboard Vercel usa (o valor de `VITE_CLOUD_DATA_URL` no Vercel). Ela tem este formato:
-`https://docs.google.com/spreadsheets/d/SEU-ID/gviz/tq?tqx=out:json`
+**4. Atualizar `src/data/squads.ts`**
+- Adicionar mapeamento `Team` (Jira) → Squad name para cada SM
+- Ex: `{ "Time Scania": { sm: "Edmilson", squad: "Scania" } }`
 
-### Implementacao
+**5. Atualizar `SmReportTab.tsx` e `SdmTab.tsx`**
+- Substituir imports de `CONE_MOCK_DATA` por `useConeData()`
+- Adicionar loading skeleton
+- Mesma UI, dados reais
 
-| Acao | Arquivo | Descricao |
-|------|---------|-----------|
-| Novo | `supabase/functions/read-jira-data/index.ts` | Edge Function que busca dados da Google Sheets, faz parse do formato gviz, e retorna `JiraItem[]` |
-| Novo | `src/hooks/useConeData.ts` | Hook que consome a Edge Function, replica os calculos do dashboard Vercel (vazao, cycle time, P85, itens >P85, cone) e retorna no formato `Record<string, Record<string, SquadConeData>>` |
-| Novo | `src/services/metricsCalculator.ts` | Logica de calculo extraida do `useDashboardData.ts` do Vercel: throughput semanal, lead time medio, P85, projecao do cone |
-| Editar | `src/components/wow-v2/SmReportTab.tsx` | Substituir `CONE_MOCK_DATA` por `useConeData()`, mostrar loading state |
-| Editar | `src/components/wow-v2/SdmTab.tsx` | Substituir `CONE_MOCK_DATA` por `useConeData()`, mostrar loading state |
-| Editar | `src/data/squads.ts` | Mapear nomes de `Team` (do Jira) para SM/Squad |
+### Primeiro Passo Técnico
 
-### Logica de calculo (replicando o dashboard Vercel)
+Antes de implementar os cálculos, vou testar a Edge Function existente com `?mode=discover` para listar as abas do Excel e entender a estrutura dos dados. Isso vai confirmar que a autenticação Azure está funcionando e revelar os nomes corretos das abas.
 
-Para cada squad (Team):
-- **Vazao**: itens resolvidos na ultima semana
-- **Cycle Time**: media de `(Resolved - Created)` em dias
-- **P85**: percentil 85 do cycle time
-- **Itens >P85**: contagem de itens com cycle time acima do P85
-- **Cone**: verde se vazao >= 3 e nenhum >P85, amarelo se 1-2 >P85, vermelho se >= 3 >P85
+### Arquivos Impactados
 
-### Detalhes tecnicos
-
-- A Edge Function armazena a URL do Google Sheets como secret (`GOOGLE_SHEETS_DATA_URL`)
-- O formato gviz retorna JSON envolto em callback — a Edge Function faz o parse
-- Cache de 1h via `Cache-Control` header
-- Fallback para `CONE_MOCK_DATA` se a API falhar
+| Ação | Arquivo |
+|------|---------|
+| Editar | `supabase/functions/read-sharepoint-data/index.ts` |
+| Novo | `src/services/metricsCalculator.ts` |
+| Novo | `src/hooks/useConeData.ts` |
+| Editar | `src/data/squads.ts` (mapeamento Team→SM) |
+| Editar | `src/components/wow-v2/SmReportTab.tsx` |
+| Editar | `src/components/wow-v2/SdmTab.tsx` |
 
