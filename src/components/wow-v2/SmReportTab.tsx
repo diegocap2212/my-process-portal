@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
-import MetricCard from "./MetricCard";
+
 import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
-import { useConeData, getSmTotalsFromData } from "@/hooks/useConeData";
+import { useConeData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
-  const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
+  
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
@@ -18,7 +18,6 @@ const SmReportTab: React.FC = () => {
   const { submitWeeklyReport } = useWeeklyReports();
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
-  const totals = getSmTotalsFromData(coneData, selectedSm);
   const week = getCurrentWeek();
 
   const handleSubmit = async () => {
@@ -36,7 +35,7 @@ const SmReportTab: React.FC = () => {
         {SM_NAMES.map((sm) => (
           <div
             key={sm}
-            onClick={() => { setSelectedSm(sm); setExpandedSquad(null); setQ1(""); setQ2(""); setQ3(""); }}
+            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); }}
             style={{
               padding: "6px 14px",
               fontSize: 11,
@@ -63,66 +62,37 @@ const SmReportTab: React.FC = () => {
         SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
       </div>
 
-      {/* Metrics Grid */}
+      {/* Métricas do Cone por Squad */}
       <div style={{ ...labelStyle, color: "#7B5EA7", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
         <span style={{ width: 12, height: 1, background: "#7B5EA7" }} />Métricas do Cone · Automático
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 14 }}>
-        <MetricCard label="Vazão" value={totals.vazao} unit="itens" accent={smColors[selectedSm]} />
-        <MetricCard label="Cycle Time" value={totals.cycleTime} unit="dias" />
-        <MetricCard label="P85" value={totals.p85} unit="dias" />
-        <MetricCard label="Itens >P85" value={totals.acimP85} accent={totals.acimP85 > 2 ? "#9E3D2B" : "#0f1729"} />
-      </div>
-
-      {/* Squad Table */}
-      <div style={{
-        background: "#fff", border: "1px solid #e0dcd7", marginBottom: 24, overflow: "hidden",
-      }}>
-        <div style={{
-          display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px",
-          padding: "8px 12px", background: "#faf9f7", borderBottom: "1px solid #e0dcd7",
-        }}>
-          {["Squad", "Vazão", "Cycle", "P85", ">P85", "Cone"].map((h) => (
-            <div key={h} style={{ ...fontMono, fontSize: 8, fontWeight: 600, letterSpacing: ".1em", color: "rgba(26,29,35,.4)", textTransform: "uppercase" }}>
-              {h}
-            </div>
-          ))}
-        </div>
-        {Object.entries(smData).map(([squad, data], i) => (
-          <React.Fragment key={squad}>
-            <div
-              onClick={() => setExpandedSquad(expandedSquad === squad ? null : squad)}
-              style={{
-                display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px",
-                padding: "10px 12px", borderBottom: "1px solid #f0ede8",
-                background: expandedSquad === squad ? "#f5f3ef" : i % 2 === 1 ? "#fdfcfb" : "#fff",
-                alignItems: "center", cursor: "pointer", transition: "background .15s",
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 500, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 10, color: expandedSquad === squad ? smColors[selectedSm] : "#999", transition: "transform .2s", display: "inline-block", transform: expandedSquad === squad ? "rotate(90deg)" : "rotate(0)" }}>▶</span>
-                {squad}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
+        {Object.entries(smData).map(([squad, data]) => (
+          <div key={squad} style={{ background: "#fff", border: "1px solid #e0dcd7" }}>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "10px 14px", borderBottom: "1px solid #e0dcd7", background: "#faf9f7",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif" }}>{squad}</span>
                 {SM_SQUAD_DETAILS[selectedSm]?.find(s => s.name === squad)?.description && (
-                  <span style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.35)", marginLeft: 2 }}>
+                  <span style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.35)" }}>
                     {SM_SQUAD_DETAILS[selectedSm].find(s => s.name === squad)!.description}
                   </span>
                 )}
               </div>
-              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.vazao}</div>
-              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.cycleTime}d</div>
-              <div style={{ ...fontMono, fontSize: 12, color: "#1a1d23" }}>{data.p85}d</div>
-              <div style={{ ...fontMono, fontSize: 12, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23", fontWeight: data.acimP85 > 0 ? 600 : 400 }}>
-                {data.acimP85}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ ...fontMono, fontSize: 10, color: "rgba(26,29,35,.5)" }}>
+                  Vazão <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.vazao}</span> · Cycle <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.cycleTime}d</span> · P85 <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.p85}d</span> · {">"}P85 <span style={{ fontWeight: 600, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23" }}>{data.acimP85}</span>
+                </div>
+                <ConeStatus status={data.cone} />
               </div>
-              <ConeStatus status={data.cone} />
             </div>
-            {expandedSquad === squad && (
-              <div style={{ padding: "12px", borderBottom: "1px solid #e0dcd7" }}>
-                <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
-              </div>
-            )}
-          </React.Fragment>
+            <div style={{ padding: "12px" }}>
+              <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+            </div>
+          </div>
         ))}
       </div>
 
