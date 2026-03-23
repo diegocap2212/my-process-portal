@@ -56,6 +56,15 @@ export function formatWeekLabel(d: Date): string {
   return `${dd}/${mm}`;
 }
 
+export function formatWeekRange(monday: Date): string {
+  const sun = new Date(monday.getTime() + 6 * 86400000);
+  const d1 = String(monday.getDate()).padStart(2, "0");
+  const m1 = String(monday.getMonth() + 1).padStart(2, "0");
+  const d2 = String(sun.getDate()).padStart(2, "0");
+  const m2 = String(sun.getMonth() + 1).padStart(2, "0");
+  return `${d1}/${m1} - ${d2}/${m2}`;
+}
+
 // Team name from Jira → { sm, squad }
 export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },

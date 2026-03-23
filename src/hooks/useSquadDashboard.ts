@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { JiraItem } from "@/services/metricsCalculator";
-import { parseExcelDate, getMonday, formatWeekLabel } from "@/services/metricsCalculator";
+import { parseExcelDate, getMonday, formatWeekLabel, formatWeekRange } from "@/services/metricsCalculator";
 import { JIRA_TEAM_TO_SQUAD } from "@/services/metricsCalculator";
 import type { SquadDataOverride } from "@/hooks/useSquadReports";
 
@@ -116,11 +116,11 @@ export function useSquadDashboard(
 
     const weeklyData: WeekPoint[] = weeks.map((weekStart, idx) => {
       const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
-      const label = formatWeekLabel(weekStart);
+      const label = formatWeekRange(weekStart);
 
-      // Burndown cumulativo (como Vercel): scope até semana - resolved até semana
+      // Burndown cumulativo (alinhado com Vercel): inclui DESCARTADO no scope
       const scopeAtWeek = parsed.filter(
-        (i) => i.createdDate && i.createdDate < weekEnd && i.Status !== "DESCARTADO"
+        (i) => i.createdDate && i.createdDate < weekEnd
       ).length;
       const resolvedAtWeek = parsed.filter(
         (i) => i.resolvedDate && i.resolvedDate < weekEnd
@@ -210,12 +210,12 @@ export function useSquadDashboard(
       : 1;
     const velocity = weeksWithData > 0 ? totalEntregas / weeksWithData : 1;
 
-    // 20 projection weeks (como Vercel)
+    // 20 projection weeks (alinhado com Vercel: fixo 3/sem melhor, 1/sem pior)
     for (let i = 1; i <= 20; i++) {
       const projDate = new Date(currentMonday.getTime() + i * 7 * 86400000);
-      const label = formatWeekLabel(projDate);
-      const melhor = Math.max(0, Math.round(currentAFazer - i * (velocity * 1.5)));
-      const pior = Math.max(0, Math.round(currentAFazer - i * (velocity * 0.5)));
+      const label = formatWeekRange(projDate);
+      const melhor = Math.max(0, Math.round(currentAFazer - i * 3));
+      const pior = Math.max(0, Math.round(currentAFazer - i * 1));
       const tendencia = Math.max(0, Math.round(currentAFazer - i * velocity));
 
       weeklyData.push({
