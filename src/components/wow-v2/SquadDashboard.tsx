@@ -141,11 +141,11 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
               const d = payload[0]?.payload;
               const total = (d?.planejadas || 0) + (d?.naoPlanejadas || 0);
               return (
-                <div style={{ background: "#0f1729", color: "#fff", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6 }}>
+                <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
                   <div style={{ color: "#2A6B50" }}>✓ Planejados: {d?.planejadas || 0}</div>
-                  <div style={{ color: "#c9a84c" }}>⚡ Não Planejados: {d?.naoPlanejadas || 0}</div>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,.15)", marginTop: 4, paddingTop: 4 }}>
+                  <div style={{ color: "#9E7B00" }}>⚡ Não Planejados: {d?.naoPlanejadas || 0}</div>
+                  <div style={{ borderTop: "1px solid #e0dcd7", marginTop: 4, paddingTop: 4 }}>
                     Total: {total} &nbsp;·&nbsp; Taxa: {d?.percentPlanejado || 0}%
                   </div>
                 </div>
