@@ -14,6 +14,7 @@ interface UseConeDataResult {
 
 export function useConeData(): UseConeDataResult {
   const [data, setData] = useState<Record<string, Record<string, SquadConeData>>>(CONE_MOCK_DATA);
+  const [rawItems, setRawItems] = useState<JiraItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
