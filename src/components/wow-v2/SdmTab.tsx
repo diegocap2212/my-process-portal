@@ -143,7 +143,7 @@ const SdmTab: React.FC = () => {
           const pendingReports: string[] = [];
 
           SM_NAMES.forEach((sm) => {
-            const smData = CONE_MOCK_DATA[sm] || {};
+            const smData = coneData[sm] || {};
             Object.entries(smData).forEach(([squad, data]) => {
               totalAcimP85 += data.acimP85;
               if (data.cone === "red") criticalCones.push(`${squad} (${sm})`);
