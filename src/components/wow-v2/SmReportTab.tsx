@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
@@ -6,6 +6,16 @@ import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
+import { parseExcelDate } from "@/services/metricsCalculator";
+
+const PERIOD_OPTIONS = [
+  { label: "Última semana", days: 7 },
+  { label: "Últimas 2 semanas", days: 14 },
+  { label: "Últimas 4 semanas", days: 28 },
+  { label: "Último mês", days: 30 },
+  { label: "Últimos 3 meses", days: 90 },
+  { label: "Tudo", days: 0 },
+];
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
@@ -15,11 +25,22 @@ const SmReportTab: React.FC = () => {
   const [q3, setQ3] = useState("");
   const [q4, setQ4] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [periodDays, setPeriodDays] = useState(28);
 
   const { submitWeeklyReport } = useWeeklyReports();
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
   const week = getCurrentWeek();
+
+  const filteredItems = useMemo(() => {
+    if (periodDays === 0) return rawItems;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - periodDays);
+    return rawItems.filter((item) => {
+      const created = parseExcelDate(item.Created);
+      return created && created >= cutoff;
+    });
+  }, [rawItems, periodDays]);
 
   const handleSubmit = async () => {
     if (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) return;
@@ -54,13 +75,31 @@ const SmReportTab: React.FC = () => {
         ))}
       </div>
 
-      {/* Week indicator */}
+      {/* Week indicator + Period filter */}
       <div style={{
-        ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
-        marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: 16,
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
-        SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
+        <div style={{
+          ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
+          SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
+        </div>
+        <select
+          value={periodDays}
+          onChange={(e) => setPeriodDays(Number(e.target.value))}
+          style={{
+            ...fontMono, fontSize: 10, padding: "4px 8px",
+            border: "1px solid #e0dcd7", background: "#faf9f7",
+            color: "#1a1d23", cursor: "pointer",
+          }}
+        >
+          {PERIOD_OPTIONS.map((opt) => (
+            <option key={opt.days} value={opt.days}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Métricas do Cone por Squad */}
@@ -83,15 +122,10 @@ const SmReportTab: React.FC = () => {
                   </span>
                 )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ ...fontMono, fontSize: 10, color: "rgba(26,29,35,.5)" }}>
-                  Vazão <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.vazao}</span> · Cycle <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.cycleTime}d</span> · P85 <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.p85}d</span> · {">"}P85 <span style={{ fontWeight: 600, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23" }}>{data.acimP85}</span>
-                </div>
-                <ConeStatus status={data.cone} />
-              </div>
+              <ConeStatus status={data.cone} />
             </div>
             <div style={{ padding: "12px" }}>
-              <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+              <SquadDashboard rawItems={filteredItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
             </div>
           </div>
         ))}
