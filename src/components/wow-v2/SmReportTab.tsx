@@ -35,7 +35,7 @@ const SmReportTab: React.FC = () => {
         {SM_NAMES.map((sm) => (
           <div
             key={sm}
-            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); }}
+            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); setQ4(""); }}
             style={{
               padding: "6px 14px",
               fontSize: 11,
