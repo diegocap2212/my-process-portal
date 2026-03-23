@@ -229,6 +229,8 @@ export function useSquadDashboard(
         naoPlanejadas: 0,
         vazaoTotal: 0,
         leadTime: 0,
+        percentPlanejado: 0,
+        mediaMovel: 0,
         entradas: 0,
         saidas: 0,
         saldo: 0,
