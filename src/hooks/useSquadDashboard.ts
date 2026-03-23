@@ -56,7 +56,7 @@ export function useSquadDashboard(
       : squadItems;
 
     // Parse dates
-    const parsed = squadItems.map((item) => ({
+    const parsed = filteredByRelease.map((item) => ({
       ...item,
       createdDate: parseExcelDate(item.Created),
       resolvedDate: parseExcelDate(item.Resolved),
