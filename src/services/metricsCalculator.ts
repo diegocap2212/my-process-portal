@@ -87,9 +87,7 @@ export function calculateMetrics(
     const p85 = cycleTimes.length > 0 ? +percentile(cycleTimes, 85).toFixed(1) : 0;
 
     const acimP85 = p85 > 0
-      ? resolvedWithCycle.filter(
-          (r) => r.resolved >= oneWeekAgo && r.cycleDays > p85
-        ).length
+      ? recentResolved.filter((r) => r.cycleDays > p85).length
       : 0;
 
     // Cone: simple heuristic
