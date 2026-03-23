@@ -171,6 +171,7 @@ export function useSquadDashboard(
     return {
       kpis: { escopo, entregas, wip, leadTime },
       weeklyData,
+      releases,
     };
-  }, [rawItems, squadName, sm, overrides]);
+  }, [rawItems, squadName, sm, overrides, selectedRelease]);
 }
