@@ -3,18 +3,20 @@ import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants"
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 import MetricCard from "./MetricCard";
 import ConeStatus from "./ConeStatus";
+import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData, getSmTotalsFromData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
+  const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const { submitWeeklyReport } = useWeeklyReports();
-  const { data: coneData, loading: coneLoading, isLive } = useConeData();
+  const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
   const totals = getSmTotalsFromData(coneData, selectedSm);
   const week = getCurrentWeek();
