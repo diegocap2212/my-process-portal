@@ -41,7 +41,7 @@ export function formatWeekLabel(d: Date): string {
 }
 
 // Team name from Jira → { sm, squad }
-export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
+export const JIRA_JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },
   TAOS: { sm: "Gabriela", squad: "Taos" },
   GOL: { sm: "Gabriela", squad: "Canal Indireto" },
@@ -68,7 +68,7 @@ export function calculateMetrics(
   const bySquad: Record<string, { sm: string; squad: string; items: JiraItem[] }> = {};
 
   for (const item of items) {
-    const mapping = TEAM_TO_SQUAD[item.Team];
+    const mapping = JIRA_TEAM_TO_SQUAD[item.Team];
     if (!mapping) continue;
     const key = `${mapping.sm}::${mapping.squad}`;
     if (!bySquad[key]) bySquad[key] = { ...mapping, items: [] };
@@ -117,7 +117,7 @@ export function calculateMetrics(
   }
 
   // Ensure all known squads appear even if no data
-  for (const [team, mapping] of Object.entries(TEAM_TO_SQUAD)) {
+  for (const [team, mapping] of Object.entries(JIRA_TEAM_TO_SQUAD)) {
     if (!result[mapping.sm]) result[mapping.sm] = {};
     if (!result[mapping.sm][mapping.squad]) {
       result[mapping.sm][mapping.squad] = {
