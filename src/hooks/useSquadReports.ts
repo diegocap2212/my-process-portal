@@ -7,38 +7,57 @@ export interface SquadDataOverride {
   value: number;
 }
 
+export interface SquadReportData {
+  notes: string;
+  q1: string;
+  q2: string;
+  q3: string;
+  q4: string;
+}
+
+const emptyReport: SquadReportData = { notes: "", q1: "", q2: "", q3: "", q4: "" };
+
 export function useSquadReports(sm: string, squad: string, week: string) {
-  const [notes, setNotes] = useState("");
+  const [report, setReport] = useState<SquadReportData>(emptyReport);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Load existing notes
   useEffect(() => {
     setLoaded(false);
     supabase
       .from("squad_reports")
-      .select("notes")
+      .select("notes, q1, q2, q3, q4")
       .eq("sm", sm)
       .eq("squad", squad)
       .eq("week", week)
       .maybeSingle()
       .then(({ data }) => {
-        setNotes(data?.notes || "");
+        setReport({
+          notes: data?.notes || "",
+          q1: data?.q1 || "",
+          q2: data?.q2 || "",
+          q3: data?.q3 || "",
+          q4: data?.q4 || "",
+        });
         setLoaded(true);
       });
   }, [sm, squad, week]);
 
-  const saveNotes = useCallback(async (value: string) => {
+  const updateField = useCallback((field: keyof SquadReportData, value: string) => {
+    setReport((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const saveReport = useCallback(async (data?: Partial<SquadReportData>) => {
     setSaving(true);
-    // upsert
+    const toSave = data ? { ...report, ...data } : report;
     const { error } = await supabase
       .from("squad_reports")
-      .upsert({ sm, squad, week, notes: value }, { onConflict: "sm,squad,week" });
+      .upsert({ sm, squad, week, ...toSave }, { onConflict: "sm,squad,week" });
     setSaving(false);
     return !error;
-  }, [sm, squad, week]);
+  }, [sm, squad, week, report]);
 
-  return { notes, setNotes, saveNotes, saving, loaded };
+  return { report, updateField, saveReport, saving, loaded };
 }
 
 export function useSquadOverrides(sm: string, squad: string) {

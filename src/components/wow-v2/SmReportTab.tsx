@@ -20,11 +20,6 @@ const PERIOD_OPTIONS = [
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
   
-  const [q1, setQ1] = useState("");
-  const [q2, setQ2] = useState("");
-  const [q3, setQ3] = useState("");
-  const [q4, setQ4] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [periodDays, setPeriodDays] = useState(28);
 
   const { submitWeeklyReport } = useWeeklyReports();
