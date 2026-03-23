@@ -21,6 +21,7 @@ export interface WeekPoint {
   criados: number;
   resolvidos: number;
   leadTime: number;
+  hasOverride?: boolean;
 }
 
 export interface SquadDashboardData {
