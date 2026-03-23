@@ -57,8 +57,8 @@ const SmReportTab: React.FC = () => {
         ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
         marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c9a84c" }} />
-        SEMANA {week}
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
+        SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
       </div>
 
       {/* Metrics Grid */}
