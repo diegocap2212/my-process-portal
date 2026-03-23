@@ -57,7 +57,7 @@ export function useConeData(): UseConeDataResult {
     return () => { cancelled = true; };
   }, []);
 
-  return { data, loading, error, isLive };
+  return { data, rawItems, loading, error, isLive };
 }
 
 // Re-export helpers that work with any data shape
