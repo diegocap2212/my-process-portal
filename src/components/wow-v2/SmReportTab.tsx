@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
@@ -6,6 +6,16 @@ import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
+import { parseExcelDate } from "@/services/metricsCalculator";
+
+const PERIOD_OPTIONS = [
+  { label: "Última semana", days: 7 },
+  { label: "Últimas 2 semanas", days: 14 },
+  { label: "Últimas 4 semanas", days: 28 },
+  { label: "Último mês", days: 30 },
+  { label: "Últimos 3 meses", days: 90 },
+  { label: "Tudo", days: 0 },
+];
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
