@@ -8,32 +8,12 @@ import { getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
 import { parseExcelDate } from "@/services/metricsCalculator";
 
-const PERIOD_OPTIONS = [
-  { label: "Última semana", days: 7 },
-  { label: "Últimas 2 semanas", days: 14 },
-  { label: "Últimas 4 semanas", days: 28 },
-  { label: "Último mês", days: 30 },
-  { label: "Últimos 3 meses", days: 90 },
-  { label: "Tudo", days: 0 },
-];
-
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
-  const [periodDays, setPeriodDays] = useState(28);
 
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
   const week = getCurrentWeek();
-
-  const filteredItems = useMemo(() => {
-    if (periodDays === 0) return rawItems;
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - periodDays);
-    return rawItems.filter((item) => {
-      const created = parseExcelDate(item.Created);
-      return created && created >= cutoff;
-    });
-  }, [rawItems, periodDays]);
 
   return (
     <div>
