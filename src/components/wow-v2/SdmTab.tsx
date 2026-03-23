@@ -1,15 +1,16 @@
 import React from "react";
 import { fontSerif, fontMono, labelStyle } from "@/styles/constants";
 import { SM_NAMES, smColors, SM_SQUAD_DETAILS } from "@/data/squads";
-import { CONE_MOCK_DATA, getSmTotals, getTorreTotals } from "@/data/cone-mock";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
 import type { WeeklyReport } from "@/hooks/useWeeklyReport";
+import { useConeData, getSmTotalsFromData, getTorreTotalsFromData } from "@/hooks/useConeData";
 import MetricCard from "./MetricCard";
 import ConeStatus from "./ConeStatus";
 
 const SdmTab: React.FC = () => {
   const { reports, loading } = useWeeklyReports();
-  const torre = getTorreTotals();
+  const { data: coneData, loading: coneLoading, isLive } = useConeData();
+  const torre = getTorreTotalsFromData(coneData);
   const week = getCurrentWeek();
 
   const getLatestReport = (sm: string): WeeklyReport | null => {
@@ -23,8 +24,8 @@ const SdmTab: React.FC = () => {
         ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
         marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c9a84c" }} />
-        VISÃO CONSOLIDADA · SEMANA {week}
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
+        VISÃO CONSOLIDADA · SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
       </div>
 
       {/* Torre Metrics */}
@@ -42,10 +43,10 @@ const SdmTab: React.FC = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
         {SM_NAMES.map((sm) => {
-          const totals = getSmTotals(sm);
+          const totals = getSmTotalsFromData(coneData, sm);
           const report = getLatestReport(sm);
           const squads = SM_SQUAD_DETAILS[sm] || [];
-          const smData = CONE_MOCK_DATA[sm] || {};
+          const smData = coneData[sm] || {};
 
           return (
             <div key={sm} style={{
@@ -142,7 +143,7 @@ const SdmTab: React.FC = () => {
           const pendingReports: string[] = [];
 
           SM_NAMES.forEach((sm) => {
-            const smData = CONE_MOCK_DATA[sm] || {};
+            const smData = coneData[sm] || {};
             Object.entries(smData).forEach(([squad, data]) => {
               totalAcimP85 += data.acimP85;
               if (data.cone === "red") criticalCones.push(`${squad} (${sm})`);

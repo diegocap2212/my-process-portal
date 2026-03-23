@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
-import { CONE_MOCK_DATA, getSmTotals } from "@/data/cone-mock";
 import MetricCard from "./MetricCard";
 import ConeStatus from "./ConeStatus";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
+import { useConeData, getSmTotalsFromData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
@@ -14,8 +14,9 @@ const SmReportTab: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const { submitWeeklyReport } = useWeeklyReports();
-  const smData = CONE_MOCK_DATA[selectedSm] || {};
-  const totals = getSmTotals(selectedSm);
+  const { data: coneData, loading: coneLoading, isLive } = useConeData();
+  const smData = coneData[selectedSm] || {};
+  const totals = getSmTotalsFromData(coneData, selectedSm);
   const week = getCurrentWeek();
 
   const handleSubmit = async () => {
@@ -56,8 +57,8 @@ const SmReportTab: React.FC = () => {
         ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
         marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c9a84c" }} />
-        SEMANA {week}
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
+        SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
       </div>
 
       {/* Metrics Grid */}
