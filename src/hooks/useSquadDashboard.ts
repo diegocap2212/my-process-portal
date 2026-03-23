@@ -115,7 +115,18 @@ export function useSquadDashboard(
           i.Status !== "Descartado"
       ).length;
 
-      return { week: label, weekDate: weekStart, aFazer, criados, resolvidos, leadTime: weekLeadTime };
+      // Apply overrides if present
+      let finalCriados = criados;
+      let finalResolvidos = resolvidos;
+      let hasOverride = false;
+      if (overrides) {
+        const criadoOverride = overrides.find((o) => o.week === label && o.field === "criados");
+        const resolvidoOverride = overrides.find((o) => o.week === label && o.field === "resolvidos");
+        if (criadoOverride) { finalCriados = criadoOverride.value; hasOverride = true; }
+        if (resolvidoOverride) { finalResolvidos = resolvidoOverride.value; hasOverride = true; }
+      }
+
+      return { week: label, weekDate: weekStart, aFazer, criados: finalCriados, resolvidos: finalResolvidos, leadTime: weekLeadTime, hasOverride };
     });
 
     // Projections from current week
