@@ -93,6 +93,8 @@ export function calculateMetrics(
   for (const item of items) {
     const mapping = JIRA_TEAM_TO_SQUAD[item.Team];
     if (!mapping) continue;
+    // Normalize status for consistent filtering
+    item.Status = (item.Status || "").toUpperCase();
     const key = `${mapping.sm}::${mapping.squad}`;
     if (!bySquad[key]) bySquad[key] = { ...mapping, items: [] };
     bySquad[key].items.push(item);
