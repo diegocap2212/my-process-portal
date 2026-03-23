@@ -75,7 +75,7 @@ const SmReportTab: React.FC = () => {
               <ConeStatus status={data.cone} />
             </div>
             <div style={{ padding: "12px" }}>
-              <SquadDashboard rawItems={filteredItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+              <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
             </div>
           </div>
         ))}
