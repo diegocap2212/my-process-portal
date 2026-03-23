@@ -210,12 +210,12 @@ export function useSquadDashboard(
       : 1;
     const velocity = weeksWithData > 0 ? totalEntregas / weeksWithData : 1;
 
-    // 20 projection weeks (como Vercel)
+    // 20 projection weeks (alinhado com Vercel: fixo 3/sem melhor, 1/sem pior)
     for (let i = 1; i <= 20; i++) {
       const projDate = new Date(currentMonday.getTime() + i * 7 * 86400000);
-      const label = formatWeekLabel(projDate);
-      const melhor = Math.max(0, Math.round(currentAFazer - i * (velocity * 1.5)));
-      const pior = Math.max(0, Math.round(currentAFazer - i * (velocity * 0.5)));
+      const label = formatWeekRange(projDate);
+      const melhor = Math.max(0, Math.round(currentAFazer - i * 3));
+      const pior = Math.max(0, Math.round(currentAFazer - i * 1));
       const tendencia = Math.max(0, Math.round(currentAFazer - i * velocity));
 
       weeklyData.push({
