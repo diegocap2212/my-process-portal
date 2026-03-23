@@ -32,6 +32,16 @@ const SmReportTab: React.FC = () => {
   const smData = coneData[selectedSm] || {};
   const week = getCurrentWeek();
 
+  const filteredItems = useMemo(() => {
+    if (periodDays === 0) return rawItems;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - periodDays);
+    return rawItems.filter((item) => {
+      const created = parseExcelDate(item.Created);
+      return created && created >= cutoff;
+    });
+  }, [rawItems, periodDays]);
+
   const handleSubmit = async () => {
     if (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) return;
     setSubmitting(true);
