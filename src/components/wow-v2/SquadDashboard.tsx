@@ -114,7 +114,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
             <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
             <YAxis tick={{ fontSize: 9 }} stroke="#999" />
-            <Tooltip contentStyle={{ fontSize: 11, background: "#0f1729", color: "#fff", border: "none", borderRadius: 4 }} />
+            <Tooltip contentStyle={{ fontSize: 11, background: "#fff", color: "#1a1d23", border: "1px solid #e0dcd7", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,.1)" }} />
             <Area type="monotone" dataKey="aFazer" name="A Fazer (Real)" stroke={accent} fill={accent} fillOpacity={0.15} strokeWidth={2} />
             <Area type="monotone" dataKey="melhorCenario" name="Melhor Cenário" stroke="#2A6B50" fill="#2A6B50" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
             <Area type="monotone" dataKey="piorCenario" name="Pior Cenário" stroke="#9E3D2B" fill="#9E3D2B" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="5 3" />
@@ -141,11 +141,11 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
               const d = payload[0]?.payload;
               const total = (d?.planejadas || 0) + (d?.naoPlanejadas || 0);
               return (
-                <div style={{ background: "#0f1729", color: "#fff", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6 }}>
+                <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
                   <div style={{ color: "#2A6B50" }}>✓ Planejados: {d?.planejadas || 0}</div>
-                  <div style={{ color: "#c9a84c" }}>⚡ Não Planejados: {d?.naoPlanejadas || 0}</div>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,.15)", marginTop: 4, paddingTop: 4 }}>
+                  <div style={{ color: "#9E7B00" }}>⚡ Não Planejados: {d?.naoPlanejadas || 0}</div>
+                  <div style={{ borderTop: "1px solid #e0dcd7", marginTop: 4, paddingTop: 4 }}>
                     Total: {total} &nbsp;·&nbsp; Taxa: {d?.percentPlanejado || 0}%
                   </div>
                 </div>
@@ -175,10 +175,10 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
               return (
-                <div style={{ background: "#0f1729", color: "#fff", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6 }}>
+                <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
                   <div style={{ color: "#2A6B50" }}>Vazão: {d?.vazaoTotal || 0} itens</div>
-                  <div style={{ color: "#7B5EA7" }}>Média Móvel: {d?.mediaMovel || 0}</div>
+                  <div style={{ color: "#6B4FA0" }}>Média Móvel: {d?.mediaMovel || 0}</div>
                   <div style={{ color: "#9E3D2B" }}>Lead Time: {d?.leadTime || 0} dias</div>
                 </div>
               );
