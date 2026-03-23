@@ -1,59 +1,50 @@
 
 
-## Integração SharePoint — Plano de Implementação
+## Plano: Integrar Dados Reais via Google Sheets (Mesmo Fonte do Dashboard Vercel)
 
-### Situação atual
-- Azure AD configurado: Client ID `966e1a2e...`, Tenant ID `8f13a14b...`, Client Secret recebido
-- Projeto **não tem Supabase/Lovable Cloud** configurado — preciso ativar para criar Edge Functions
-- Mock data em `src/data/cone-mock.ts` já tem a interface `SquadConeData` pronta
+### Descoberta Importante
 
-### Pré-requisitos antes de codar
+Analisei o código do `locavia-dashboard` no GitHub e descobri que ele **nao le diretamente do SharePoint**. Ele usa uma **URL de Google Sheets** como intermediário:
 
-**1. Ativar Lovable Cloud** — necessário para Edge Functions. Vou ativar na implementação.
+```
+VITE_CLOUD_DATA_URL = "https://docs.google.com/spreadsheets/d/{id}/gviz/tq?tqx=out:json"
+```
 
-**2. Armazenar 3 secrets no projeto:**
-- `AZURE_TENANT_ID` = `8f13a14b-e674-447f-93e0-812f6809af2f`
-- `AZURE_CLIENT_ID` = `966e1a2e-781a-40b1-b4b1-d6991bc9906f`
-- `AZURE_CLIENT_SECRET` = o valor que você enviou
+Os dados sao itens Jira com colunas: `Type`, `Key`, `Summary`, `Status`, `Team`, `Created`, `Resolved`, `Release`. A partir disso, o dashboard calcula vazao, cycle time, lead time, WIP, projecao do cone (melhor/pior cenario), balanco de fluxo — tudo client-side.
 
-**3. Informação pendente do usuário:**
-- **Nome do site SharePoint** (ex: `TorreLM`, `Locavia`)
-- **Path do arquivo Excel** dentro do SharePoint (ex: `Documents/metricas.xlsx`)
-- **Nome da aba/planilha** que contém os dados do cone (vazão, cycle time, etc.)
-- **Estrutura das colunas** — quais colunas mapeiam para vazão, cycleTime, p85, acimP85, cone
+### O que muda
 
-### Implementação técnica
+Podemos **abandonar a autenticacao Azure/SharePoint** e usar a mesma Google Sheets URL. Isso elimina o problema do Client Secret.
 
-| Ação | Arquivo |
-|------|---------|
-| Novo | `supabase/functions/read-sharepoint-data/index.ts` — Edge Function |
-| Novo | `src/hooks/useConeData.ts` — Hook que consome a Edge Function |
-| Editar | `src/components/wow-v2/SmReportTab.tsx` — Trocar mock por dados reais |
-| Editar | `src/components/wow-v2/SdmTab.tsx` — Trocar mock por dados reais |
+### Informacao necessaria
 
-**Edge Function** (`read-sharepoint-data`):
-- Autentica no Azure AD via client credentials flow (`https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token`)
-- Usa Microsoft Graph API para ler o Excel (`/sites/{siteId}/drive/items/{itemId}/workbook/worksheets/{sheet}/usedRange`)
-- Faz parse das linhas para o formato `SquadConeData`
-- Cache de 1h via header `Cache-Control`
-- CORS headers para chamadas do frontend
+Preciso que voce me envie a **URL do Google Sheets** que o dashboard Vercel usa (o valor de `VITE_CLOUD_DATA_URL` no Vercel). Ela tem este formato:
+`https://docs.google.com/spreadsheets/d/SEU-ID/gviz/tq?tqx=out:json`
 
-**Hook** (`useConeData`):
-- Chama a Edge Function via `supabase.functions.invoke('read-sharepoint-data')`
-- Retorna dados na mesma interface `Record<string, Record<string, SquadConeData>>`
-- Fallback automático para `CONE_MOCK_DATA` se a API falhar
-- Estado de loading/error
+### Implementacao
 
-**Componentes** (SmReportTab + SdmTab):
-- Substituir imports diretos de `CONE_MOCK_DATA` por `useConeData()`
-- Mesma UI, mesma lógica, dados reais
+| Acao | Arquivo | Descricao |
+|------|---------|-----------|
+| Novo | `supabase/functions/read-jira-data/index.ts` | Edge Function que busca dados da Google Sheets, faz parse do formato gviz, e retorna `JiraItem[]` |
+| Novo | `src/hooks/useConeData.ts` | Hook que consome a Edge Function, replica os calculos do dashboard Vercel (vazao, cycle time, P85, itens >P85, cone) e retorna no formato `Record<string, Record<string, SquadConeData>>` |
+| Novo | `src/services/metricsCalculator.ts` | Logica de calculo extraida do `useDashboardData.ts` do Vercel: throughput semanal, lead time medio, P85, projecao do cone |
+| Editar | `src/components/wow-v2/SmReportTab.tsx` | Substituir `CONE_MOCK_DATA` por `useConeData()`, mostrar loading state |
+| Editar | `src/components/wow-v2/SdmTab.tsx` | Substituir `CONE_MOCK_DATA` por `useConeData()`, mostrar loading state |
+| Editar | `src/data/squads.ts` | Mapear nomes de `Team` (do Jira) para SM/Squad |
 
-### Próximo passo imediato
+### Logica de calculo (replicando o dashboard Vercel)
 
-Antes de implementar, preciso que você me diga:
-1. O **nome do site SharePoint** onde está o Excel
-2. O **nome/path do arquivo** Excel
-3. A **aba da planilha** e **estrutura das colunas** (quais colunas = vazão, cycle time, p85, etc.)
+Para cada squad (Team):
+- **Vazao**: itens resolvidos na ultima semana
+- **Cycle Time**: media de `(Resolved - Created)` em dias
+- **P85**: percentil 85 do cycle time
+- **Itens >P85**: contagem de itens com cycle time acima do P85
+- **Cone**: verde se vazao >= 3 e nenhum >P85, amarelo se 1-2 >P85, vermelho se >= 3 >P85
 
-Sem isso, a Edge Function não sabe onde buscar os dados. Posso criar a estrutura inteira com placeholder e você ajusta depois, ou podemos mapear agora.
+### Detalhes tecnicos
+
+- A Edge Function armazena a URL do Google Sheets como secret (`GOOGLE_SHEETS_DATA_URL`)
+- O formato gviz retorna JSON envolto em callback — a Edge Function faz o parse
+- Cache de 1h via `Cache-Control` header
+- Fallback para `CONE_MOCK_DATA` se a API falhar
 
