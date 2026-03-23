@@ -1,41 +1,61 @@
 
 
-## Plano: Trazer a Visão Completa do Dashboard para Dentro do Portal
+## Plano: Report por Squad + Edição de Dados nos Gráficos
 
 ### O que muda
 
-Quando o SM clica em um squad (ex: Scania), ao invés de ver apenas a tabela resumida, ele verá a **mesma visão do dashboard Vercel**: KPI cards (Escopo, Entregas, WIP, Lead Time), gráfico de Burndown & Projeção do Cone, Throughput Mensurado e Balanço do Fluxo — tudo filtrado para aquele time específico.
+1. **Report individual por squad**: Abaixo dos gráficos de cada squad, campos de texto para o SM registrar observações específicas daquele time (ex: report do Nivus separado do Optimus).
 
-### Abordagem
-
-Replicar a lógica do `useDashboardData.ts` do Vercel dentro do portal, usando os mesmos dados brutos que já buscamos via Edge Function. Os gráficos usarão **Recharts** (mesma lib do dashboard Vercel). Não precisa de API nova — os dados já estão disponíveis.
+2. **Edição dos dados nos gráficos**: Permitir que o SM clique em uma semana e altere manualmente os valores de criados/resolvidos — útil quando os dados do Jira não refletem a realidade.
 
 ### Implementação
 
 | Ação | Arquivo | Descrição |
 |------|---------|-----------|
-| Novo | `src/hooks/useSquadDashboard.ts` | Hook que recebe `JiraItem[]` filtrados por team e calcula: escopo total, entregas, WIP, lead time médio, chartData (burndown + projeção do cone com melhor/pior cenário), weeklyPerformance (throughput + balanço do fluxo) — replicando a lógica exata do Vercel |
-| Novo | `src/components/wow-v2/SquadDashboard.tsx` | Componente com 4 KPI cards + 3 gráficos Recharts (Burndown AreaChart, Throughput ComposedChart, Balanço BarChart) — visual adaptado ao design system do portal (cores, fontes, bordas) |
-| Editar | `src/components/wow-v2/SmReportTab.tsx` | Ao clicar em uma linha da tabela de squads, expande o `SquadDashboard` abaixo com os dados daquele time |
-| Editar | `src/hooks/useConeData.ts` | Expor também os `JiraItem[]` brutos (além dos dados calculados) para que o SquadDashboard possa recalcular por squad |
-| Editar | `src/services/metricsCalculator.ts` | Extrair funções utilitárias (excelToJSDate, getMon, formatDate) para reuso |
+| **Migração** | Nova migration | Criar tabela `squad_reports` (sm, squad, week, notes TEXT) e tabela `squad_data_overrides` (sm, squad, week, field TEXT, value INT) para persistir reports por squad e edições manuais |
+| **Novo** | `src/hooks/useSquadReports.ts` | Hook para CRUD dos reports por squad e dos overrides de dados |
+| **Editar** | `src/components/wow-v2/SquadDashboard.tsx` | Adicionar: (1) textarea abaixo dos gráficos para o report do squad, (2) modal de edição ao clicar em uma barra/ponto do gráfico — permitindo alterar `criados` e `resolvidos` daquela semana |
+| **Editar** | `src/hooks/useSquadDashboard.ts` | Aceitar `overrides` opcionais e aplicar os valores editados sobre os dados calculados do Jira |
 
-### Lógica de cálculo (do Vercel)
+### Fluxo de edição dos gráficos
 
-Para cada squad selecionado:
-- **Escopo Total**: itens criados até hoje com aquele Team
-- **Entregas**: itens com Resolved preenchido
-- **WIP**: itens sem Resolved e status != DESCARTADO
-- **Lead Time**: média de (Resolved - Created) em dias
-- **Burndown**: curva real de "A Fazer" por semana + projeções (melhor: 3/sem, pior: 1/sem, tendência real)
-- **Throughput**: barras semanais de vazão + linha de lead time médio
-- **Balanço**: demandas criadas vs entregas feitas por semana
+1. SM clica em uma barra do gráfico de Throughput ou Balanço
+2. Abre um mini-modal com os campos "Criados" e "Resolvidos" pré-preenchidos com o valor atual
+3. SM altera e salva → persiste na tabela `squad_data_overrides`
+4. O gráfico re-renderiza com os valores editados (indicador visual de que foi editado manualmente)
 
-### Visual
+### Banco de dados
 
-Mantém o design system do portal (fundo `#fff`, bordas `#e0dcd7`, fontes DM Sans/IBM Plex Mono) mas com gráficos Recharts usando as mesmas cores do dashboard Vercel (azul/roxo para realizado, laranja para tendência, verde para melhor cenário).
+```sql
+-- Report qualitativo por squad
+CREATE TABLE squad_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sm TEXT NOT NULL,
+  squad TEXT NOT NULL,
+  week TEXT NOT NULL,
+  notes TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(sm, squad, week)
+);
 
-### Dependência
+-- Override manual dos dados dos gráficos
+CREATE TABLE squad_data_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sm TEXT NOT NULL,
+  squad TEXT NOT NULL,
+  week TEXT NOT NULL,
+  field TEXT NOT NULL, -- 'criados' ou 'resolvidos'
+  value INT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(sm, squad, week, field)
+);
+```
 
-Recharts já está instalado no projeto (usado em `CheckpointChart.tsx`).
+RLS: public read/insert/update/delete (mesmo padrão das tabelas existentes).
+
+### Detalhes técnicos
+
+- O textarea do report por squad usa `ON CONFLICT (sm, squad, week) DO UPDATE` para upsert.
+- Os overrides são aplicados no hook `useSquadDashboard` antes de gerar os dados dos gráficos: se existe override para aquela semana/field, o valor do Jira é substituído.
+- Barras com override recebem uma borda pontilhada ou cor diferenciada para sinalizar edição manual.
 
