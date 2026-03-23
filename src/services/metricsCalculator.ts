@@ -19,6 +19,22 @@ export function excelSerialToDate(serial: number): Date {
 
 export function parseExcelDate(val: string | null): Date | null {
   if (!val) return null;
+
+  // Try "dd/MM/yyyy HH:mm" format first
+  const brMatch = val.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+  if (brMatch) {
+    const [, dd, mm, yyyy, hh, min] = brMatch;
+    return new Date(+yyyy, +mm - 1, +dd, +hh, +min);
+  }
+
+  // Try "dd/MM/yyyy" without time
+  const brDateOnly = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (brDateOnly) {
+    const [, dd, mm, yyyy] = brDateOnly;
+    return new Date(+yyyy, +mm - 1, +dd);
+  }
+
+  // Fallback: Excel serial number
   const num = parseFloat(val);
   if (isNaN(num)) return null;
   return excelSerialToDate(num);
@@ -48,6 +64,13 @@ export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> =
   NIVUS: { sm: "Rafael", squad: "Nivus" },
   OPTIMUS: { sm: "Rafael", squad: "Optimus" },
 };
+
+// Reverse lookup: squad name → list of Jira team names
+export function getJiraTeamsForSquad(squadName: string, sm: string): string[] {
+  return Object.entries(JIRA_TEAM_TO_SQUAD)
+    .filter(([_, v]) => v.squad === squadName && v.sm === sm)
+    .map(([k]) => k);
+}
 
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;

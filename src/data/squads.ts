@@ -9,17 +9,14 @@ export interface SquadInfo {
 export const SM_SQUAD_DETAILS: Record<string, SquadInfo[]> = {
   Edmilson: [
     { name: "Scania", projectType: "Locavia" },
-    { name: "Contratos", projectType: "Sobrevivência" },
-    { name: "Plataforma", projectType: "Sobrevivência" },
   ],
   Gabriela: [
     { name: "GOL", projectType: "Sustentação" },
     { name: "TAOS", projectType: "Locavia" },
-    { name: "Sales MKT", projectType: "Locavia", description: "Sem cone — não rastreado no Jira" },
   ],
   Rafael: [
-    { name: "Nivus", projectType: "Locavia", description: "Portal Autoatendimento" },
-    { name: "Optimus", projectType: "Locavia", description: "Contratos" },
+    { name: "Nivus", projectType: "Locavia" },
+    { name: "Optimus", projectType: "Locavia" },
   ],
 };
 

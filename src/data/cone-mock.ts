@@ -11,12 +11,10 @@ export interface SquadConeData {
 export const CONE_MOCK_DATA: Record<string, Record<string, SquadConeData>> = {
   Edmilson: {
     Scania: { vazao: 5, cycleTime: 2.8, p85: 4.5, acimP85: 0, cone: "green" },
-    Contratos: { vazao: 3, cycleTime: 5.0, p85: 7.0, acimP85: 2, cone: "yellow" },
-    Plataforma: { vazao: 2, cycleTime: 6.1, p85: 8.0, acimP85: 3, cone: "red" },
   },
   Gabriela: {
-    "Canal Indireto": { vazao: 4, cycleTime: 3.2, p85: 5.0, acimP85: 1, cone: "yellow" },
-    Taos: { vazao: 6, cycleTime: 4.0, p85: 6.5, acimP85: 2, cone: "red" },
+    GOL: { vazao: 4, cycleTime: 3.2, p85: 5.0, acimP85: 1, cone: "yellow" },
+    TAOS: { vazao: 6, cycleTime: 4.0, p85: 6.5, acimP85: 2, cone: "red" },
   },
   Rafael: {
     Nivus: { vazao: 4, cycleTime: 3.5, p85: 5.2, acimP85: 1, cone: "green" },
