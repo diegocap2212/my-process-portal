@@ -38,6 +38,7 @@ export function useConeData(): UseConeDataResult {
 
         const metrics = calculateMetrics(items);
         setData(metrics);
+        setRawItems(items);
         setIsLive(true);
         setError(null);
       } catch (err) {
