@@ -19,6 +19,22 @@ export function excelSerialToDate(serial: number): Date {
 
 export function parseExcelDate(val: string | null): Date | null {
   if (!val) return null;
+
+  // Try "dd/MM/yyyy HH:mm" format first
+  const brMatch = val.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+  if (brMatch) {
+    const [, dd, mm, yyyy, hh, min] = brMatch;
+    return new Date(+yyyy, +mm - 1, +dd, +hh, +min);
+  }
+
+  // Try "dd/MM/yyyy" without time
+  const brDateOnly = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (brDateOnly) {
+    const [, dd, mm, yyyy] = brDateOnly;
+    return new Date(+yyyy, +mm - 1, +dd);
+  }
+
+  // Fallback: Excel serial number
   const num = parseFloat(val);
   if (isNaN(num)) return null;
   return excelSerialToDate(num);
