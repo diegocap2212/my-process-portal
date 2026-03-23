@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
@@ -6,34 +6,13 @@ import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
 import { getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
-import { parseExcelDate } from "@/services/metricsCalculator";
-
-const PERIOD_OPTIONS = [
-  { label: "Última semana", days: 7 },
-  { label: "Últimas 2 semanas", days: 14 },
-  { label: "Últimas 4 semanas", days: 28 },
-  { label: "Último mês", days: 30 },
-  { label: "Últimos 3 meses", days: 90 },
-  { label: "Tudo", days: 0 },
-];
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
-  const [periodDays, setPeriodDays] = useState(28);
 
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
   const week = getCurrentWeek();
-
-  const filteredItems = useMemo(() => {
-    if (periodDays === 0) return rawItems;
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - periodDays);
-    return rawItems.filter((item) => {
-      const created = parseExcelDate(item.Created);
-      return created && created >= cutoff;
-    });
-  }, [rawItems, periodDays]);
 
   return (
     <div>
@@ -60,10 +39,9 @@ const SmReportTab: React.FC = () => {
         ))}
       </div>
 
-      {/* Week indicator + Period filter */}
+      {/* Week indicator */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: 16,
+        display: "flex", alignItems: "center", marginBottom: 16,
       }}>
         <div style={{
           ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
@@ -72,19 +50,6 @@ const SmReportTab: React.FC = () => {
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
           SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
         </div>
-        <select
-          value={periodDays}
-          onChange={(e) => setPeriodDays(Number(e.target.value))}
-          style={{
-            ...fontMono, fontSize: 10, padding: "4px 8px",
-            border: "1px solid #e0dcd7", background: "#faf9f7",
-            color: "#1a1d23", cursor: "pointer",
-          }}
-        >
-          {PERIOD_OPTIONS.map((opt) => (
-            <option key={opt.days} value={opt.days}>{opt.label}</option>
-          ))}
-        </select>
       </div>
 
       {/* Métricas do Cone por Squad */}
@@ -110,7 +75,7 @@ const SmReportTab: React.FC = () => {
               <ConeStatus status={data.cone} />
             </div>
             <div style={{ padding: "12px" }}>
-              <SquadDashboard rawItems={filteredItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+              <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
             </div>
           </div>
         ))}
