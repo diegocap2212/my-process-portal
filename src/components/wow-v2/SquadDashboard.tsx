@@ -131,11 +131,10 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
       </div>
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px", marginBottom: 4 }}>
         <ResponsiveContainer width="100%" height={220}>
-          <ComposedChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} onClick={handleBarClick}>
+          <BarChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} onClick={handleBarClick}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
             <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
-            <YAxis yAxisId="left" tick={{ fontSize: 9 }} stroke="#999" />
-            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9 }} stroke="#999" domain={[0, 100]} unit="%" />
+            <YAxis tick={{ fontSize: 9 }} stroke="#999" />
             <Tooltip content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
@@ -151,26 +150,24 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
                 </div>
               );
             }} />
-            <Bar yAxisId="left" dataKey="planejadas" name="Planejados" stackId="plan" fill="#2A6B50" fillOpacity={0.75} radius={[0, 0, 0, 0]} />
-            <Bar yAxisId="left" dataKey="naoPlanejadas" name="Não Planejados" stackId="plan" fill="#c9a84c" fillOpacity={0.75} radius={[2, 2, 0, 0]} />
-            <Line yAxisId="right" type="monotone" dataKey="percentPlanejado" name="% Planejamento" stroke="#7B5EA7" strokeWidth={2} dot={{ r: 3, fill: "#7B5EA7" }} />
+            <Bar dataKey="planejadas" name="Planejados" stackId="plan" fill="#2A6B50" fillOpacity={0.75} radius={[0, 0, 0, 0]} />
+            <Bar dataKey="naoPlanejadas" name="Não Planejados" stackId="plan" fill="#c9a84c" fillOpacity={0.75} radius={[2, 2, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 9 }} />
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Vazão Semanal */}
-      {sectionLabel("Vazão Semanal", "#2A6B50")}
+      {/* Vazão e Lead Time */}
+      {sectionLabel("Vazão e Lead Time", "#2A6B50")}
       <div style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.45)", marginBottom: 8, marginTop: -8, lineHeight: 1.4 }}>
-        Total de itens resolvidos por semana &nbsp;·&nbsp; Linha tracejada = média móvel (4 sem)
+        Vazão = itens resolvidos na semana &nbsp;|&nbsp; Lead Time = tempo médio de resolução (dias)
       </div>
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px" }}>
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+          <BarChart data={realData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0dcd7" />
             <XAxis dataKey="week" tick={{ fontSize: 9 }} stroke="#999" />
-            <YAxis yAxisId="left" tick={{ fontSize: 9 }} stroke="#999" />
-            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9 }} stroke="#999" />
+            <YAxis tick={{ fontSize: 9 }} stroke="#999" />
             <Tooltip content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
@@ -178,16 +175,14 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
                 <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
                   <div style={{ color: "#2A6B50" }}>Vazão: {d?.vazaoTotal || 0} itens</div>
-                  <div style={{ color: "#6B4FA0" }}>Média Móvel: {d?.mediaMovel || 0}</div>
                   <div style={{ color: "#9E3D2B" }}>Lead Time: {d?.leadTime || 0} dias</div>
                 </div>
               );
             }} />
-            <Bar yAxisId="left" dataKey="vazaoTotal" name="Vazão" fill="#2A6B50" fillOpacity={0.6} radius={[2, 2, 0, 0]} />
-            <Line yAxisId="left" type="monotone" dataKey="mediaMovel" name="Média Móvel (4 sem)" stroke="#7B5EA7" strokeWidth={2} strokeDasharray="6 3" dot={false} />
-            <Line yAxisId="right" type="monotone" dataKey="leadTime" name="Lead Time (dias)" stroke="#9E3D2B" strokeWidth={2} dot={{ r: 3 }} />
+            <Bar dataKey="vazaoTotal" name="Vazão (itens)" fill="#2A6B50" fillOpacity={0.7} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="leadTime" name="Lead Time (dias)" fill="#9E3D2B" fillOpacity={0.6} radius={[2, 2, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 9 }} />
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
