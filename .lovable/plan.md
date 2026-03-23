@@ -1,58 +1,41 @@
 
 
-## Plano: Integrar Dados Reais do SharePoint via Edge Function
+## Plano: Trazer a Visão Completa do Dashboard para Dentro do Portal
 
-### Entendimento Atualizado
+### O que muda
 
-O fluxo do dashboard Vercel é: **SharePoint Excel → sync diário → data.json local**. Os dados são itens Jira com colunas `Type, Key, Summary, Status, Team, Created, Resolved, Release`. O dashboard calcula métricas (vazão, cycle time, P85, cone) a partir desses dados brutos.
+Quando o SM clica em um squad (ex: Scania), ao invés de ver apenas a tabela resumida, ele verá a **mesma visão do dashboard Vercel**: KPI cards (Escopo, Entregas, WIP, Lead Time), gráfico de Burndown & Projeção do Cone, Throughput Mensurado e Balanço do Fluxo — tudo filtrado para aquele time específico.
 
-Nós já temos a Edge Function `read-sharepoint-data` que lê o Excel diretamente do SharePoint via Microsoft Graph API, com os secrets Azure configurados.
+### Abordagem
+
+Replicar a lógica do `useDashboardData.ts` do Vercel dentro do portal, usando os mesmos dados brutos que já buscamos via Edge Function. Os gráficos usarão **Recharts** (mesma lib do dashboard Vercel). Não precisa de API nova — os dados já estão disponíveis.
 
 ### Implementação
 
-**1. Ajustar Edge Function `read-sharepoint-data`**
-- Já existe e lê o SharePoint Excel
-- Adicionar um modo `?mode=read&sheet=NOME_DA_ABA` que retorna os dados brutos como `JiraItem[]`
-- Precisamos descobrir qual aba contém os dados (a função já tem modo `discover` para listar abas)
+| Ação | Arquivo | Descrição |
+|------|---------|-----------|
+| Novo | `src/hooks/useSquadDashboard.ts` | Hook que recebe `JiraItem[]` filtrados por team e calcula: escopo total, entregas, WIP, lead time médio, chartData (burndown + projeção do cone com melhor/pior cenário), weeklyPerformance (throughput + balanço do fluxo) — replicando a lógica exata do Vercel |
+| Novo | `src/components/wow-v2/SquadDashboard.tsx` | Componente com 4 KPI cards + 3 gráficos Recharts (Burndown AreaChart, Throughput ComposedChart, Balanço BarChart) — visual adaptado ao design system do portal (cores, fontes, bordas) |
+| Editar | `src/components/wow-v2/SmReportTab.tsx` | Ao clicar em uma linha da tabela de squads, expande o `SquadDashboard` abaixo com os dados daquele time |
+| Editar | `src/hooks/useConeData.ts` | Expor também os `JiraItem[]` brutos (além dos dados calculados) para que o SquadDashboard possa recalcular por squad |
+| Editar | `src/services/metricsCalculator.ts` | Extrair funções utilitárias (excelToJSDate, getMon, formatDate) para reuso |
 
-**2. Criar `src/services/metricsCalculator.ts`**
-- Replica a lógica do `useDashboardData.ts` do Vercel:
-  - Parse de datas Excel (decimal → JS Date)
-  - **Vazão**: itens resolvidos na última semana por Team
-  - **Cycle Time**: média de `(Resolved - Created)` em dias por Team
-  - **P85**: percentil 85 do cycle time por Team
-  - **Itens >P85**: contagem de itens com cycle time acima do P85
-  - **Cone**: verde/amarelo/vermelho baseado na projeção (melhor cenário 3/sem, pior 1/sem)
-- Mapeia `Team` do Jira → SM/Squad usando `SM_SQUAD_DETAILS`
+### Lógica de cálculo (do Vercel)
 
-**3. Criar `src/hooks/useConeData.ts`**
-- Chama `supabase.functions.invoke('read-sharepoint-data', { body: { mode: 'read', sheet: '...' } })`
-- Passa os dados pelo `metricsCalculator`
-- Retorna `Record<string, Record<string, SquadConeData>>`
-- Fallback para `CONE_MOCK_DATA` se API falhar
-- Estados de loading/error
+Para cada squad selecionado:
+- **Escopo Total**: itens criados até hoje com aquele Team
+- **Entregas**: itens com Resolved preenchido
+- **WIP**: itens sem Resolved e status != DESCARTADO
+- **Lead Time**: média de (Resolved - Created) em dias
+- **Burndown**: curva real de "A Fazer" por semana + projeções (melhor: 3/sem, pior: 1/sem, tendência real)
+- **Throughput**: barras semanais de vazão + linha de lead time médio
+- **Balanço**: demandas criadas vs entregas feitas por semana
 
-**4. Atualizar `src/data/squads.ts`**
-- Adicionar mapeamento `Team` (Jira) → Squad name para cada SM
-- Ex: `{ "Time Scania": { sm: "Edmilson", squad: "Scania" } }`
+### Visual
 
-**5. Atualizar `SmReportTab.tsx` e `SdmTab.tsx`**
-- Substituir imports de `CONE_MOCK_DATA` por `useConeData()`
-- Adicionar loading skeleton
-- Mesma UI, dados reais
+Mantém o design system do portal (fundo `#fff`, bordas `#e0dcd7`, fontes DM Sans/IBM Plex Mono) mas com gráficos Recharts usando as mesmas cores do dashboard Vercel (azul/roxo para realizado, laranja para tendência, verde para melhor cenário).
 
-### Primeiro Passo Técnico
+### Dependência
 
-Antes de implementar os cálculos, vou testar a Edge Function existente com `?mode=discover` para listar as abas do Excel e entender a estrutura dos dados. Isso vai confirmar que a autenticação Azure está funcionando e revelar os nomes corretos das abas.
-
-### Arquivos Impactados
-
-| Ação | Arquivo |
-|------|---------|
-| Editar | `supabase/functions/read-sharepoint-data/index.ts` |
-| Novo | `src/services/metricsCalculator.ts` |
-| Novo | `src/hooks/useConeData.ts` |
-| Editar | `src/data/squads.ts` (mapeamento Team→SM) |
-| Editar | `src/components/wow-v2/SmReportTab.tsx` |
-| Editar | `src/components/wow-v2/SdmTab.tsx` |
+Recharts já está instalado no projeto (usado em `CheckpointChart.tsx`).
 
