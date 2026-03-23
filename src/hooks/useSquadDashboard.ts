@@ -162,5 +162,5 @@ export function useSquadDashboard(
       kpis: { escopo, entregas, wip, leadTime },
       weeklyData,
     };
-  }, [rawItems, squadName, sm]);
+  }, [rawItems, squadName, sm, overrides]);
 }
