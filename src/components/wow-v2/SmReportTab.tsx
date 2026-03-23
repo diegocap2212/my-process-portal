@@ -75,13 +75,31 @@ const SmReportTab: React.FC = () => {
         ))}
       </div>
 
-      {/* Week indicator */}
+      {/* Week indicator + Period filter */}
       <div style={{
-        ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
-        marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: 16,
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
-        SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
+        <div style={{
+          ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
+          SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
+        </div>
+        <select
+          value={periodDays}
+          onChange={(e) => setPeriodDays(Number(e.target.value))}
+          style={{
+            ...fontMono, fontSize: 10, padding: "4px 8px",
+            border: "1px solid #e0dcd7", background: "#faf9f7",
+            color: "#1a1d23", cursor: "pointer",
+          }}
+        >
+          {PERIOD_OPTIONS.map((opt) => (
+            <option key={opt.days} value={opt.days}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Métricas do Cone por Squad */}
@@ -104,15 +122,10 @@ const SmReportTab: React.FC = () => {
                   </span>
                 )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ ...fontMono, fontSize: 10, color: "rgba(26,29,35,.5)" }}>
-                  Vazão <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.vazao}</span> · Cycle <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.cycleTime}d</span> · P85 <span style={{ fontWeight: 600, color: "#1a1d23" }}>{data.p85}d</span> · {">"}P85 <span style={{ fontWeight: 600, color: data.acimP85 > 0 ? "#9E3D2B" : "#1a1d23" }}>{data.acimP85}</span>
-                </div>
-                <ConeStatus status={data.cone} />
-              </div>
+              <ConeStatus status={data.cone} />
             </div>
             <div style={{ padding: "12px" }}>
-              <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
+              <SquadDashboard rawItems={filteredItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
             </div>
           </div>
         ))}
