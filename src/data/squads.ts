@@ -13,8 +13,8 @@ export const SM_SQUAD_DETAILS: Record<string, SquadInfo[]> = {
     { name: "Plataforma", projectType: "Sobrevivência" },
   ],
   Gabriela: [
-    { name: "Portal Vendas Assistidas", projectType: "Sustentação" },
-    { name: "Esteira de Crédito", projectType: "Locavia" },
+    { name: "GOL", projectType: "Sustentação" },
+    { name: "TAOS", projectType: "Locavia" },
     { name: "Sales MKT", projectType: "Locavia", description: "Sem cone — não rastreado no Jira" },
   ],
   Rafael: [
