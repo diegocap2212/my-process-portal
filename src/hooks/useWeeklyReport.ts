@@ -71,6 +71,7 @@ export function useWeeklyReports() {
         q1: input.q1.trim(),
         q2: input.q2.trim(),
         q3: input.q3.trim(),
+        q4: input.q4.trim(),
       });
 
       if (error) throw error;
