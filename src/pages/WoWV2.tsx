@@ -52,10 +52,10 @@ export default function WoWV2() {
       {/* Navbar */}
       <div style={{ background: "#0f1729", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,.06)" }}>
         <div style={{ maxWidth: 1060, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center", height: 44, gap: 10 }}>
-          <div
-            onClick={() => navigate("/")}
-            style={{ ...fontSerif, fontSize: 17, color: "#fff", cursor: "pointer" }}
-          >
+            <div
+              onClick={() => navigate("/")}
+              style={{ ...fontSerif, fontSize: 17, color: "#fff", cursor: "pointer" }}
+            >
             Torre <span style={{ color: "#c9a84c", fontWeight: 600 }}>LM</span>
           </div>
           <div style={{ width: 1, height: 14, background: "rgba(255,255,255,.1)" }} />
