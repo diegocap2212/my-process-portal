@@ -18,9 +18,15 @@ export interface WeekPoint {
   melhorCenario?: number;
   piorCenario?: number;
   tendencia?: number;
-  criados: number;
-  resolvidos: number;
+  // Throughput
+  planejadas: number;
+  naoPlanejadas: number;
+  vazaoTotal: number;
   leadTime: number;
+  // Balanço
+  entradas: number;
+  saidas: number;
+  saldo: number;
   hasOverride?: boolean;
 }
 
@@ -55,9 +61,10 @@ export function useSquadDashboard(
       ? squadItems.filter((i) => i.Release === selectedRelease)
       : squadItems;
 
-    // Parse dates
+    // Parse dates & normalize status
     const parsed = filteredByRelease.map((item) => ({
       ...item,
+      Status: (item.Status || "").toUpperCase(),
       createdDate: parseExcelDate(item.Created),
       resolvedDate: parseExcelDate(item.Resolved),
     }));
@@ -66,7 +73,7 @@ export function useSquadDashboard(
     const escopo = parsed.length;
     const entregas = parsed.filter((i) => i.resolvedDate).length;
     const wip = parsed.filter(
-      (i) => !i.resolvedDate && i.Status !== "DESCARTADO" && i.Status !== "Descartado"
+      (i) => !i.resolvedDate && i.Status !== "DESCARTADO"
     ).length;
 
     const cycleTimes = parsed
@@ -79,35 +86,71 @@ export function useSquadDashboard(
         ? +(cycleTimes.reduce((s, v) => s + v, 0) / cycleTimes.length).toFixed(1)
         : 0;
 
-    // Weekly buckets (last 12 weeks)
+    // Dynamic weekly buckets from first item to current week
+    const allDates = parsed
+      .map((i) => i.createdDate)
+      .filter((d): d is Date => d !== null);
+    
     const now = new Date();
     const currentMonday = getMonday(now);
-    const weeks: Date[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const w = new Date(currentMonday.getTime() - i * 7 * 86400000);
-      weeks.push(w);
+    
+    let firstMonday: Date;
+    if (allDates.length > 0) {
+      const earliest = new Date(Math.min(...allDates.map((d) => d.getTime())));
+      firstMonday = getMonday(earliest);
+    } else {
+      firstMonday = new Date(currentMonday.getTime() - 11 * 7 * 86400000);
     }
 
-    const weeklyData: WeekPoint[] = weeks.map((weekStart) => {
+    const weeks: Date[] = [];
+    let w = new Date(firstMonday);
+    while (w <= currentMonday) {
+      weeks.push(new Date(w));
+      w = new Date(w.getTime() + 7 * 86400000);
+    }
+
+    // Find first week with a resolved item (for velocity calc)
+    let firstResolvedWeekIdx = -1;
+
+    const weeklyData: WeekPoint[] = weeks.map((weekStart, idx) => {
       const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
       const label = formatWeekLabel(weekStart);
 
-      const criados = parsed.filter(
+      // Burndown cumulativo (como Vercel): scope até semana - resolved até semana
+      const scopeAtWeek = parsed.filter(
+        (i) => i.createdDate && i.createdDate < weekEnd && i.Status !== "DESCARTADO"
+      ).length;
+      const resolvedAtWeek = parsed.filter(
+        (i) => i.resolvedDate && i.resolvedDate < weekEnd
+      ).length;
+      const aFazer = Math.max(0, scopeAtWeek - resolvedAtWeek);
+
+      // Entradas (inflow): itens criados na semana
+      const entradas = parsed.filter(
         (i) => i.createdDate && i.createdDate >= weekStart && i.createdDate < weekEnd
       ).length;
 
-      const resolvidos = parsed.filter(
+      // Saídas: itens resolvidos na semana
+      const resolvedThisWeek = parsed.filter(
         (i) => i.resolvedDate && i.resolvedDate >= weekStart && i.resolvedDate < weekEnd
+      );
+      const saidas = resolvedThisWeek.length;
+
+      if (saidas > 0 && firstResolvedWeekIdx === -1) {
+        firstResolvedWeekIdx = idx;
+      }
+
+      // Throughput: Planejadas vs Não Planejadas (como Vercel)
+      const planejadas = resolvedThisWeek.filter(
+        (i) => i.createdDate && i.createdDate < weekStart
+      ).length;
+      const naoPlanejadas = resolvedThisWeek.filter(
+        (i) => i.createdDate && i.createdDate >= weekStart
       ).length;
 
-      const weekCycleTimes = parsed
-        .filter(
-          (i) =>
-            i.resolvedDate &&
-            i.resolvedDate >= weekStart &&
-            i.resolvedDate < weekEnd &&
-            i.createdDate
-        )
+      // Lead Time médio da semana
+      const weekCycleTimes = resolvedThisWeek
+        .filter((i) => i.createdDate)
         .map((i) => (i.resolvedDate!.getTime() - i.createdDate!.getTime()) / 86400000)
         .filter((d) => d >= 0);
 
@@ -116,44 +159,49 @@ export function useSquadDashboard(
           ? +(weekCycleTimes.reduce((s, v) => s + v, 0) / weekCycleTimes.length).toFixed(1)
           : 0;
 
-      // A Fazer: items created before weekEnd and not resolved before weekEnd
-      const aFazer = parsed.filter(
-        (i) =>
-          i.createdDate &&
-          i.createdDate < weekEnd &&
-          (!i.resolvedDate || i.resolvedDate >= weekEnd) &&
-          i.Status !== "DESCARTADO" &&
-          i.Status !== "Descartado"
-      ).length;
-
-      // Apply overrides if present
-      let finalCriados = criados;
-      let finalResolvidos = resolvidos;
+      // Apply overrides
+      let finalEntradas = entradas;
+      let finalSaidas = saidas;
       let hasOverride = false;
       if (overrides) {
         const criadoOverride = overrides.find((o) => o.week === label && o.field === "criados");
         const resolvidoOverride = overrides.find((o) => o.week === label && o.field === "resolvidos");
-        if (criadoOverride) { finalCriados = criadoOverride.value; hasOverride = true; }
-        if (resolvidoOverride) { finalResolvidos = resolvidoOverride.value; hasOverride = true; }
+        if (criadoOverride) { finalEntradas = criadoOverride.value; hasOverride = true; }
+        if (resolvidoOverride) { finalSaidas = resolvidoOverride.value; hasOverride = true; }
       }
 
-      return { week: label, weekDate: weekStart, aFazer, criados: finalCriados, resolvidos: finalResolvidos, leadTime: weekLeadTime, hasOverride };
+      const saldo = finalEntradas - finalSaidas;
+
+      return {
+        week: label,
+        weekDate: weekStart,
+        aFazer,
+        planejadas,
+        naoPlanejadas,
+        vazaoTotal: hasOverride ? finalSaidas : saidas,
+        leadTime: weekLeadTime,
+        entradas: finalEntradas,
+        saidas: finalSaidas,
+        saldo,
+        hasOverride,
+      };
     });
 
-    // Projections from current week
+    // Cone projection (como Vercel): velocity = totalEntregas / totalSemanas desde primeira entrega
     const currentAFazer = weeklyData[weeklyData.length - 1]?.aFazer || 0;
-    const recentVazao = weeklyData.slice(-4).map((w) => w.resolvidos);
-    const avgVazao = recentVazao.length > 0
-      ? recentVazao.reduce((s, v) => s + v, 0) / recentVazao.length
+    const totalEntregas = entregas;
+    const weeksWithData = firstResolvedWeekIdx >= 0
+      ? weeks.length - firstResolvedWeekIdx
       : 1;
+    const velocity = weeksWithData > 0 ? totalEntregas / weeksWithData : 1;
 
-    // Add 8 more projection weeks
-    for (let i = 1; i <= 8; i++) {
+    // 20 projection weeks (como Vercel)
+    for (let i = 1; i <= 20; i++) {
       const projDate = new Date(currentMonday.getTime() + i * 7 * 86400000);
       const label = formatWeekLabel(projDate);
-      const melhor = Math.max(0, currentAFazer - i * 3);
-      const pior = Math.max(0, currentAFazer - i * 1);
-      const tendencia = Math.max(0, Math.round(currentAFazer - i * avgVazao));
+      const melhor = Math.max(0, Math.round(currentAFazer - i * (velocity * 1.5)));
+      const pior = Math.max(0, Math.round(currentAFazer - i * (velocity * 0.5)));
+      const tendencia = Math.max(0, Math.round(currentAFazer - i * velocity));
 
       weeklyData.push({
         week: label,
@@ -162,9 +210,13 @@ export function useSquadDashboard(
         melhorCenario: melhor,
         piorCenario: pior,
         tendencia,
-        criados: 0,
-        resolvidos: 0,
+        planejadas: 0,
+        naoPlanejadas: 0,
+        vazaoTotal: 0,
         leadTime: 0,
+        entradas: 0,
+        saidas: 0,
+        saldo: 0,
       });
     }
 
