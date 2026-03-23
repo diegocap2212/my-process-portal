@@ -6,6 +6,7 @@ import { calculateMetrics, type JiraItem } from "@/services/metricsCalculator";
 
 interface UseConeDataResult {
   data: Record<string, Record<string, SquadConeData>>;
+  rawItems: JiraItem[];
   loading: boolean;
   error: string | null;
   isLive: boolean;
