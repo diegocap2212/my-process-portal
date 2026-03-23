@@ -72,10 +72,11 @@ export function calculateMetrics(
       if (cycleDays >= 0) resolvedWithCycle.push({ resolved, cycleDays });
     }
 
-    // Vazão: resolved in last 7 days
-    const vazao = resolvedWithCycle.filter(
-      (r) => r.resolved >= oneWeekAgo
-    ).length;
+    // Vazão: resolved in last 4 weeks
+    const recentResolved = resolvedWithCycle.filter(
+      (r) => r.resolved >= fourWeeksAgo
+    );
+    const vazao = recentResolved.length;
 
     // Cycle times
     const cycleTimes = resolvedWithCycle.map((r) => r.cycleDays).sort((a, b) => a - b);
