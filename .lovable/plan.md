@@ -1,61 +1,30 @@
 
 
-## Plano: Report por Squad + Edição de Dados nos Gráficos
+## Plano: Report Qualitativo por Squad
+
+### Situação atual
+O report qualitativo (4 perguntas) fica no final da página e é único por SM/semana, salvo na tabela `weekly_reports`.
 
 ### O que muda
-
-1. **Report individual por squad**: Abaixo dos gráficos de cada squad, campos de texto para o SM registrar observações específicas daquele time (ex: report do Nivus separado do Optimus).
-
-2. **Edição dos dados nos gráficos**: Permitir que o SM clique em uma semana e altere manualmente os valores de criados/resolvidos — útil quando os dados do Jira não refletem a realidade.
+Mover o report qualitativo para **dentro de cada bloco de squad** (abaixo dos gráficos), tornando-o específico por time. Cada squad terá seus próprios 4 campos qualitativos.
 
 ### Implementação
 
-| Ação | Arquivo | Descrição |
-|------|---------|-----------|
-| **Migração** | Nova migration | Criar tabela `squad_reports` (sm, squad, week, notes TEXT) e tabela `squad_data_overrides` (sm, squad, week, field TEXT, value INT) para persistir reports por squad e edições manuais |
-| **Novo** | `src/hooks/useSquadReports.ts` | Hook para CRUD dos reports por squad e dos overrides de dados |
-| **Editar** | `src/components/wow-v2/SquadDashboard.tsx` | Adicionar: (1) textarea abaixo dos gráficos para o report do squad, (2) modal de edição ao clicar em uma barra/ponto do gráfico — permitindo alterar `criados` e `resolvidos` daquela semana |
-| **Editar** | `src/hooks/useSquadDashboard.ts` | Aceitar `overrides` opcionais e aplicar os valores editados sobre os dados calculados do Jira |
-
-### Fluxo de edição dos gráficos
-
-1. SM clica em uma barra do gráfico de Throughput ou Balanço
-2. Abre um mini-modal com os campos "Criados" e "Resolvidos" pré-preenchidos com o valor atual
-3. SM altera e salva → persiste na tabela `squad_data_overrides`
-4. O gráfico re-renderiza com os valores editados (indicador visual de que foi editado manualmente)
+| Ação | Detalhe |
+|------|---------|
+| **Migração** | Adicionar colunas `q1`, `q2`, `q3`, `q4` (TEXT, default '') na tabela `squad_reports` — que já tem `sm`, `squad`, `week` |
+| **`useSquadReports.ts`** | Expandir o hook para carregar e salvar os 4 campos qualitativos junto com `notes` |
+| **`SquadDashboard.tsx`** | Substituir o textarea simples pelos 4 campos qualitativos (mesmas perguntas de hoje) + botão salvar por squad |
+| **`SmReportTab.tsx`** | Remover a seção "Report Semanal · Qualitativo" do final da página (os 4 campos + botão enviar), pois agora cada squad tem o seu |
 
 ### Banco de dados
-
 ```sql
--- Report qualitativo por squad
-CREATE TABLE squad_reports (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sm TEXT NOT NULL,
-  squad TEXT NOT NULL,
-  week TEXT NOT NULL,
-  notes TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(sm, squad, week)
-);
-
--- Override manual dos dados dos gráficos
-CREATE TABLE squad_data_overrides (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sm TEXT NOT NULL,
-  squad TEXT NOT NULL,
-  week TEXT NOT NULL,
-  field TEXT NOT NULL, -- 'criados' ou 'resolvidos'
-  value INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(sm, squad, week, field)
-);
+ALTER TABLE squad_reports
+  ADD COLUMN q1 TEXT NOT NULL DEFAULT '',
+  ADD COLUMN q2 TEXT NOT NULL DEFAULT '',
+  ADD COLUMN q3 TEXT NOT NULL DEFAULT '',
+  ADD COLUMN q4 TEXT NOT NULL DEFAULT '';
 ```
 
-RLS: public read/insert/update/delete (mesmo padrão das tabelas existentes).
-
-### Detalhes técnicos
-
-- O textarea do report por squad usa `ON CONFLICT (sm, squad, week) DO UPDATE` para upsert.
-- Os overrides são aplicados no hook `useSquadDashboard` antes de gerar os dados dos gráficos: se existe override para aquela semana/field, o valor do Jira é substituído.
-- Barras com override recebem uma borda pontilhada ou cor diferenciada para sinalizar edição manual.
+A tabela `weekly_reports` permanece para histórico mas não recebe mais dados novos.
 
