@@ -18,7 +18,6 @@ const SmReportTab: React.FC = () => {
   const { submitWeeklyReport } = useWeeklyReports();
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
-  const totals = getSmTotalsFromData(coneData, selectedSm);
   const week = getCurrentWeek();
 
   const handleSubmit = async () => {
