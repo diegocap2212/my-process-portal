@@ -1,52 +1,39 @@
 
 
-## Plano: Alinhar cálculos do portal com o dashboard Vercel
+## Plano: Redesign dos gráficos de Planejamento e Throughput
 
-### Problema raiz
+### Problema
 
-Analisei o código-fonte do dashboard Vercel (`useDashboardData.ts`) e comparei com o portal. Existem 4 diferenças fundamentais na lógica de cálculo que causam divergência nos números:
+Os dois gráficos inferiores ("Throughput" e "Balanço do Fluxo") não comunicam bem o que significam. A dor principal: **não fica claro se um item foi planejado para aquela sprint/semana ou se caiu de paraquedas**. Os nomes e as métricas atuais são técnicos demais e não contam a história certa.
 
-### Diferenças encontradas
+### O que muda
 
-| Aspecto | Vercel | Portal | Impacto |
-|---------|--------|--------|---------|
-| **Parsing de datas** | `(serial - 25569) * 86400 * 1000` | `epoch(1899,11,30) + serial * 86400000` | Equivalente, OK |
-| **Status** | `Status.toUpperCase()` na normalização | Case-sensitive, checa "DESCARTADO" e "Descartado" | Itens "descartado" podem escapar |
-| **Burndown "A Fazer"** | Cumulativo: `scope_até_semana - resolved_até_semana` | Point-in-time: itens criados antes e não resolvidos antes | Pode divergir em edge cases |
-| **Projeção cone** | Velocity = `totalEntregas / totalSemanas` desde primeira entrega, 20 semanas | Velocity = média últimas 4 semanas, 8 semanas | Velocidades e alcance diferentes |
-| **Throughput** | "Planejadas" vs "Não Planejadas" + "Vazão Total" + "Lead Time (Méd)" | "Criados" vs "Resolvidos" | Métricas diferentes |
-| **Balanço do Fluxo** | "Entradas" vs "Saídas" = "Saldo" (delta) | "Criados" vs "Resolvidos" | Mesmo conceito, labels diferentes |
-| **Histórico** | Todas as semanas desde o primeiro item | Últimas 12 semanas apenas | Gráfico muito mais curto |
+**Gráfico 1 — "Itens Planejados vs Não Planejados"** (substitui "Balanço do Fluxo")
+- Renomear para **"Itens Planejados vs Não Planejados"**
+- Barras empilhadas por semana: **Planejados** (criados antes da semana e resolvidos nela) + **Não Planejados** (criados e resolvidos na mesma semana)
+- Linha de **% Planejamento** (eixo direito, 0-100%): mostra a proporção de itens planejados sobre o total resolvido na semana — dá visão imediata da previsibilidade
+- Tooltip customizado mostrando: Planejados (X), Não Planejados (Y), Total (Z), Taxa de Planejamento (W%)
+- Legenda com mini-explicação inline: "Planejado = criado antes da semana | Não Planejado = criado e resolvido na mesma semana"
 
-### O que será alterado
+**Gráfico 2 — "Vazão Semanal"** (substitui "Throughput Semanal")
+- Renomear para **"Vazão Semanal"**
+- Barras simples (não empilhadas): total de itens resolvidos por semana
+- Linha de **média móvel** (últimas 4 semanas) para mostrar tendência
+- Linha de **Lead Time médio** no eixo direito (mantido)
+- Tooltip mostrando: Vazão (X itens), Média Móvel (Y), Lead Time (Z dias)
+
+### Arquivos alterados
 
 | Arquivo | Mudança |
 |---------|---------|
-| `src/services/metricsCalculator.ts` | Normalizar `Status.toUpperCase()` no parsing |
-| `src/hooks/useSquadDashboard.ts` | (1) Calcular "A Fazer" cumulativo como Vercel. (2) Projeção cone com velocity = totalEntregas/totalSemanas e 20 semanas. (3) Histórico dinâmico desde primeiro item (não fixo 12 semanas). (4) Throughput com Planejadas/Não Planejadas. (5) Balanço com Entradas/Saídas/Saldo |
-| `src/components/wow-v2/SquadDashboard.tsx` | Atualizar gráficos para usar as novas séries (Planejadas, Não Planejadas, Entradas, Saídas, Saldo) |
+| `src/hooks/useSquadDashboard.ts` | Adicionar campos `percentPlanejado` e `mediMovel` ao `WeekPoint` |
+| `src/components/wow-v2/SquadDashboard.tsx` | Redesign dos dois gráficos com novos nomes, tooltips customizados, linha de % planejamento e média móvel |
 
 ### Detalhes técnicos
 
-**Burndown cumulativo** (alinhado com Vercel):
-```
-scope_na_semana = itens criados até fim da semana
-resolved_na_semana = itens resolvidos até fim da semana
-aFazer = scope - resolved
-```
+No hook `useSquadDashboard.ts`:
+- `percentPlanejado = planejadas / (planejadas + naoPlanejadas) * 100` (ou 0 se sem dados)
+- `mediaMovel = média de vazaoTotal das últimas 4 semanas`
 
-**Velocity do cone** (alinhado com Vercel):
-```
-velocity = totalEntregas / semanas_desde_primeira_entrega
-```
-
-**Throughput** (alinhado com Vercel):
-- Planejadas: resolvidas na semana que foram criadas antes daquela semana
-- Não Planejadas: resolvidas na semana que foram criadas naquela mesma semana
-- Lead Time médio por semana
-
-**Balanço do Fluxo** (alinhado com Vercel):
-- Entradas (inflow): itens criados na semana
-- Saídas: itens resolvidos na semana
-- Saldo: Entradas - Saídas
+No componente, tooltips customizados com React para exibir as informações contextualizadas, e uma linha de texto explicativo abaixo de cada título de seção para que qualquer pessoa entenda o gráfico sem precisar de treinamento.
 
