@@ -21,10 +21,10 @@ const SmReportTab: React.FC = () => {
   const week = getCurrentWeek();
 
   const handleSubmit = async () => {
-    if (!q1.trim() && !q2.trim() && !q3.trim()) return;
+    if (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) return;
     setSubmitting(true);
-    const ok = await submitWeeklyReport({ sm: selectedSm, week, q1, q2, q3 });
-    if (ok) { setQ1(""); setQ2(""); setQ3(""); }
+    const ok = await submitWeeklyReport({ sm: selectedSm, week, q1, q2, q3, q4 });
+    if (ok) { setQ1(""); setQ2(""); setQ3(""); setQ4(""); }
     setSubmitting(false);
   };
 
