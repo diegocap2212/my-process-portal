@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { JiraItem } from "@/services/metricsCalculator";
 import { parseExcelDate, getMonday, formatWeekLabel } from "@/services/metricsCalculator";
 import { JIRA_TEAM_TO_SQUAD } from "@/services/metricsCalculator";
+import type { SquadDataOverride } from "@/hooks/useSquadReports";
 
 export interface SquadKPIs {
   escopo: number;
@@ -20,6 +21,7 @@ export interface WeekPoint {
   criados: number;
   resolvidos: number;
   leadTime: number;
+  hasOverride?: boolean;
 }
 
 export interface SquadDashboardData {
@@ -36,7 +38,8 @@ function getSquadTeams(squadName: string, sm: string): string[] {
 export function useSquadDashboard(
   rawItems: JiraItem[],
   squadName: string,
-  sm: string
+  sm: string,
+  overrides?: SquadDataOverride[]
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
@@ -113,7 +116,18 @@ export function useSquadDashboard(
           i.Status !== "Descartado"
       ).length;
 
-      return { week: label, weekDate: weekStart, aFazer, criados, resolvidos, leadTime: weekLeadTime };
+      // Apply overrides if present
+      let finalCriados = criados;
+      let finalResolvidos = resolvidos;
+      let hasOverride = false;
+      if (overrides) {
+        const criadoOverride = overrides.find((o) => o.week === label && o.field === "criados");
+        const resolvidoOverride = overrides.find((o) => o.week === label && o.field === "resolvidos");
+        if (criadoOverride) { finalCriados = criadoOverride.value; hasOverride = true; }
+        if (resolvidoOverride) { finalResolvidos = resolvidoOverride.value; hasOverride = true; }
+      }
+
+      return { week: label, weekDate: weekStart, aFazer, criados: finalCriados, resolvidos: finalResolvidos, leadTime: weekLeadTime, hasOverride };
     });
 
     // Projections from current week
@@ -148,5 +162,5 @@ export function useSquadDashboard(
       kpis: { escopo, entregas, wip, leadTime },
       weeklyData,
     };
-  }, [rawItems, squadName, sm]);
+  }, [rawItems, squadName, sm, overrides]);
 }
