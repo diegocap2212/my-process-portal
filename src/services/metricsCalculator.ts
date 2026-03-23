@@ -78,8 +78,8 @@ export function calculateMetrics(
     );
     const vazao = recentResolved.length;
 
-    // Cycle times
-    const cycleTimes = resolvedWithCycle.map((r) => r.cycleDays).sort((a, b) => a - b);
+    // Cycle times from last 4 weeks
+    const cycleTimes = recentResolved.map((r) => r.cycleDays).sort((a, b) => a - b);
     const avgCycle = cycleTimes.length > 0
       ? +(cycleTimes.reduce((s, v) => s + v, 0) / cycleTimes.length).toFixed(1)
       : 0;
