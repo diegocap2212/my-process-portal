@@ -175,10 +175,10 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
               return (
-                <div style={{ background: "#0f1729", color: "#fff", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6 }}>
+                <div style={{ background: "#fff", color: "#1a1d23", padding: "10px 14px", borderRadius: 4, fontSize: 11, lineHeight: 1.6, border: "1px solid #e0dcd7", boxShadow: "0 4px 12px rgba(0,0,0,.1)" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
                   <div style={{ color: "#2A6B50" }}>Vazão: {d?.vazaoTotal || 0} itens</div>
-                  <div style={{ color: "#7B5EA7" }}>Média Móvel: {d?.mediaMovel || 0}</div>
+                  <div style={{ color: "#6B4FA0" }}>Média Móvel: {d?.mediaMovel || 0}</div>
                   <div style={{ color: "#9E3D2B" }}>Lead Time: {d?.leadTime || 0} dias</div>
                 </div>
               );
