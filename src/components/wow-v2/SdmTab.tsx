@@ -1,15 +1,16 @@
 import React from "react";
 import { fontSerif, fontMono, labelStyle } from "@/styles/constants";
 import { SM_NAMES, smColors, SM_SQUAD_DETAILS } from "@/data/squads";
-import { CONE_MOCK_DATA, getSmTotals, getTorreTotals } from "@/data/cone-mock";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
 import type { WeeklyReport } from "@/hooks/useWeeklyReport";
+import { useConeData, getSmTotalsFromData, getTorreTotalsFromData } from "@/hooks/useConeData";
 import MetricCard from "./MetricCard";
 import ConeStatus from "./ConeStatus";
 
 const SdmTab: React.FC = () => {
   const { reports, loading } = useWeeklyReports();
-  const torre = getTorreTotals();
+  const { data: coneData, loading: coneLoading, isLive } = useConeData();
+  const torre = getTorreTotalsFromData(coneData);
   const week = getCurrentWeek();
 
   const getLatestReport = (sm: string): WeeklyReport | null => {
