@@ -27,6 +27,7 @@ export interface WeekPoint {
 export interface SquadDashboardData {
   kpis: SquadKPIs;
   weeklyData: WeekPoint[];
+  releases: string[];
 }
 
 function getSquadTeams(squadName: string, sm: string): string[] {
