@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
-import { CONE_MOCK_DATA, getSmTotals } from "@/data/cone-mock";
 import MetricCard from "./MetricCard";
 import ConeStatus from "./ConeStatus";
 import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
+import { useConeData, getSmTotalsFromData } from "@/hooks/useConeData";
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
