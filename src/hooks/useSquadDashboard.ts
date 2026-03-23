@@ -23,6 +23,8 @@ export interface WeekPoint {
   naoPlanejadas: number;
   vazaoTotal: number;
   leadTime: number;
+  percentPlanejado: number;
+  mediaMovel: number;
   // Balanço
   entradas: number;
   saidas: number;
