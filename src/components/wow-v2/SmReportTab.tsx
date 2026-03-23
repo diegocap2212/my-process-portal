@@ -4,7 +4,7 @@ import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
 import ConeStatus from "./ConeStatus";
 import SquadDashboard from "./SquadDashboard";
-import { useWeeklyReports, getCurrentWeek } from "@/hooks/useWeeklyReport";
+import { getCurrentWeek } from "@/hooks/useWeeklyReport";
 import { useConeData } from "@/hooks/useConeData";
 import { parseExcelDate } from "@/services/metricsCalculator";
 
@@ -19,10 +19,8 @@ const PERIOD_OPTIONS = [
 
 const SmReportTab: React.FC = () => {
   const [selectedSm, setSelectedSm] = useState(SM_NAMES[0]);
-  
   const [periodDays, setPeriodDays] = useState(28);
 
-  const { submitWeeklyReport } = useWeeklyReports();
   const { data: coneData, rawItems, loading: coneLoading, isLive } = useConeData();
   const smData = coneData[selectedSm] || {};
   const week = getCurrentWeek();
@@ -37,14 +35,6 @@ const SmReportTab: React.FC = () => {
     });
   }, [rawItems, periodDays]);
 
-  const handleSubmit = async () => {
-    if (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) return;
-    setSubmitting(true);
-    const ok = await submitWeeklyReport({ sm: selectedSm, week, q1, q2, q3, q4 });
-    if (ok) { setQ1(""); setQ2(""); setQ3(""); setQ4(""); }
-    setSubmitting(false);
-  };
-
   return (
     <div>
       {/* SM Selector */}
@@ -52,7 +42,7 @@ const SmReportTab: React.FC = () => {
         {SM_NAMES.map((sm) => (
           <div
             key={sm}
-            onClick={() => { setSelectedSm(sm); setQ1(""); setQ2(""); setQ3(""); setQ4(""); }}
+            onClick={() => setSelectedSm(sm)}
             style={{
               padding: "6px 14px",
               fontSize: 11,
@@ -125,47 +115,6 @@ const SmReportTab: React.FC = () => {
           </div>
         ))}
       </div>
-
-      {/* Qualitative Report */}
-      <div style={{ ...labelStyle, color: "#2A6B50", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={{ width: 12, height: 1, background: "#2A6B50" }} />Report Semanal · Qualitativo
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-        {[
-          { n: "①", label: "O que você tracionou que os números não mostram?", val: q1, set: setQ1, ph: "Desbloqueios, facilitações, alinhamentos, decisões que você conduziu..." },
-          { n: "②", label: "Algo travado que precisa de escalação?", val: q2, set: setQ2, ph: "Se não tem nada travado, deixe em branco. Se tem, diga o quê e em qual squad." },
-          { n: "③", label: "Alguma entrega que deveria virar narrativa pro cliente?", val: q3, set: setQ3, ph: "Desbloqueio, entrega, resultado que tem potencial de virar munição executiva..." },
-          { n: "④", label: "Acompanhamento", val: q4, set: setQ4, ph: "Temas livres, anotações, pontos para condensar ao longo do tempo..." },
-        ].map(({ n, label, val, set, ph }) => (
-          <div key={n}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-              <span style={{ ...fontMono, fontSize: 11, color: smColors[selectedSm], fontWeight: 700 }}>{n}</span>
-              <span style={{ fontSize: 11, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif", fontWeight: 500 }}>{label}</span>
-            </div>
-            <textarea
-              value={val}
-              onChange={(e) => set(e.target.value)}
-              placeholder={ph}
-              rows={3}
-              style={{ ...inputStyle, resize: "vertical" as const }}
-            />
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={handleSubmit}
-        disabled={submitting || (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim())}
-        style={{
-          width: "100%", padding: "12px", background: submitting ? "#555" : "#0f1729",
-          color: "#fff", border: "none", fontFamily: "'IBM Plex Mono',monospace",
-          fontSize: 11, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
-          cursor: submitting ? "wait" : "pointer", opacity: (!q1.trim() && !q2.trim() && !q3.trim() && !q4.trim()) ? 0.4 : 1,
-        }}
-      >
-        {submitting ? "Salvando..." : "Enviar report da semana"}
-      </button>
     </div>
   );
 };
