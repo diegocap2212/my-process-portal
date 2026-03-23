@@ -115,6 +115,10 @@ export type Database = {
           created_at: string
           id: string
           notes: string
+          q1: string
+          q2: string
+          q3: string
+          q4: string
           sm: string
           squad: string
           week: string
@@ -123,6 +127,10 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string
+          q1?: string
+          q2?: string
+          q3?: string
+          q4?: string
           sm: string
           squad: string
           week: string
@@ -131,6 +139,10 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string
+          q1?: string
+          q2?: string
+          q3?: string
+          q4?: string
           sm?: string
           squad?: string
           week?: string

@@ -33,9 +33,16 @@ const sectionLabel = (text: string, color: string) => (
   </div>
 );
 
+const REPORT_FIELDS = [
+  { key: "q1" as const, n: "①", label: "O que você tracionou que os números não mostram?", ph: "Desbloqueios, facilitações, alinhamentos, decisões que você conduziu..." },
+  { key: "q2" as const, n: "②", label: "Algo travado que precisa de escalação?", ph: "Se não tem nada travado, deixe em branco. Se tem, diga o quê." },
+  { key: "q3" as const, n: "③", label: "Alguma entrega que deveria virar narrativa pro cliente?", ph: "Desbloqueio, entrega, resultado com potencial de virar munição executiva..." },
+  { key: "q4" as const, n: "④", label: "Acompanhamento", ph: "Temas livres, anotações, pontos para condensar ao longo do tempo..." },
+];
+
 const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) => {
   const week = getCurrentWeek();
-  const { notes, setNotes, saveNotes, saving } = useSquadReports(sm, squadName, week);
+  const { report, updateField, saveReport, saving } = useSquadReports(sm, squadName, week);
   const { overrides, saveOverride } = useSquadOverrides(sm, squadName);
   const [selectedRelease, setSelectedRelease] = useState<string>("");
   const { kpis, weeklyData, releases } = useSquadDashboard(rawItems, squadName, sm, overrides, selectedRelease || undefined);
@@ -63,10 +70,6 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
     ]);
     setEditSaving(false);
     setEditModal(null);
-  };
-
-  const handleNotesBlur = () => {
-    saveNotes(notes);
   };
 
   return (
@@ -121,7 +124,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
         </ResponsiveContainer>
       </div>
 
-      {/* Throughput - clickable */}
+      {/* Throughput */}
       {sectionLabel("Throughput Semanal · clique para editar", "#2A6B50")}
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px", marginBottom: 4 }}>
         <ResponsiveContainer width="100%" height={200}>
@@ -142,7 +145,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
         </ResponsiveContainer>
       </div>
 
-      {/* Balanço do Fluxo - clickable */}
+      {/* Balanço do Fluxo */}
       {sectionLabel("Balanço do Fluxo · clique para editar", "#7B5EA7")}
       <div style={{ background: "#fff", border: "1px solid #e0dcd7", padding: "12px" }}>
         <ResponsiveContainer width="100%" height={200}>
@@ -166,21 +169,38 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
         </ResponsiveContainer>
       </div>
 
-      {/* Squad Report textarea */}
-      {sectionLabel(`Report · ${squadName}`, accent)}
-      <textarea
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        onBlur={handleNotesBlur}
-        placeholder={`Observações sobre ${squadName} esta semana...`}
-        rows={4}
-        style={{ ...inputStyle, resize: "vertical" as const, background: "#fff" }}
-      />
-      {saving && (
-        <div style={{ ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)", marginTop: 4 }}>
-          Salvando...
-        </div>
-      )}
+      {/* Qualitative Report per Squad */}
+      {sectionLabel(`Report Semanal · ${squadName}`, accent)}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12 }}>
+        {REPORT_FIELDS.map(({ key, n, label, ph }) => (
+          <div key={key}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+              <span style={{ ...fontMono, fontSize: 11, color: accent, fontWeight: 700 }}>{n}</span>
+              <span style={{ fontSize: 11, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif", fontWeight: 500 }}>{label}</span>
+            </div>
+            <textarea
+              value={report[key]}
+              onChange={(e) => updateField(key, e.target.value)}
+              placeholder={ph}
+              rows={3}
+              style={{ ...inputStyle, resize: "vertical" as const, background: "#fff" }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => saveReport()}
+        disabled={saving}
+        style={{
+          width: "100%", padding: "10px", background: saving ? "#555" : "#0f1729",
+          color: "#fff", border: "none", fontFamily: "'IBM Plex Mono',monospace",
+          fontSize: 10, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+          cursor: saving ? "wait" : "pointer",
+        }}
+      >
+        {saving ? "Salvando..." : `Salvar report · ${squadName}`}
+      </button>
 
       {/* Edit Modal */}
       {editModal && (
