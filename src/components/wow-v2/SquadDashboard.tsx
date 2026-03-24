@@ -55,7 +55,7 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
     (w) => w.aFazer !== null || w.melhorCenario !== undefined
   );
   const performanceData = weeklyData.filter(
-    (w) => w.melhorCenario === undefined && w.aFazer !== null ? false : w.melhorCenario !== undefined ? false : (w.vazaoTotal > 0 || w.entradas > 0 || w.planejadas > 0 || w.naoPlanejadas > 0 || w.transbordos > 0)
+    (w) => w.melhorCenario === undefined && (w.vazaoTotal > 0 || w.entradas > 0 || w.planejadas > 0 || w.naoPlanejadas > 0 || w.transbordos > 0)
   );
 
   const handleBarClick = useCallback((data: any) => {
