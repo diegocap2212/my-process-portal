@@ -50,12 +50,12 @@ const SquadDashboard: React.FC<Props> = ({ rawItems, squadName, sm, accent }) =>
   const [editModal, setEditModal] = useState<EditModal | null>(null);
   const [editSaving, setEditSaving] = useState(false);
 
-  // Separate burndown data (has aFazer or projection) from weekly performance data
+  // Separate burndown/projection data from weekly performance data
   const burndownData = weeklyData.filter(
     (w) => w.aFazer !== null || w.melhorCenario !== undefined
   );
   const performanceData = weeklyData.filter(
-    (w) => w.aFazer === null && w.melhorCenario === undefined && (w.vazaoTotal > 0 || w.entradas > 0 || w.transbordos > 0)
+    (w) => w.melhorCenario === undefined && (w.vazaoTotal > 0 || w.entradas > 0 || w.planejadas > 0 || w.naoPlanejadas > 0 || w.transbordos > 0)
   );
 
   const handleBarClick = useCallback((data: any) => {
