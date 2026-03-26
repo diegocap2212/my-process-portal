@@ -36,7 +36,7 @@ export default function Reports() {
             style={{ ...fontSerif, fontSize: 20, color: "#111827", cursor: "pointer" }}
             onClick={() => navigate("/")}
           >
-            Dashboard de Métricas <span style={{ color: "#6366f1", fontWeight: 700 }}>LM</span>
+            Ways of Working <span style={{ color: "#6366f1", fontWeight: 700 }}>Venice</span>
           </div>
           <div style={{ flex: 1 }} />
           <div

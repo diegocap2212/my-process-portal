@@ -22,7 +22,7 @@ export const CAD_SM: Cadencia[] = [
 ];
 
 export const CAD_SDM: Cadencia[] = [
-  { id: "report-g", emoji: "📊", label: "Report para G (Lucas)", freq: "Quinzenal", tagColor: "#2A6B50", summary: "SDM compila reports diários em narrativa comercial. SM não faz nada aqui.", items: ["Compilar reports → extrair entregas + métricas", "Traduzir pra linguagem de negócio", "1 página máximo"] },
+  { id: "report-g", emoji: "📊", label: "Report para Lucas", freq: "Quinzenal", tagColor: "#2A6B50", summary: "SDM compila reports diários em narrativa comercial. SM não faz nada aqui.", items: ["Compilar reports → extrair entregas + métricas", "Traduzir pra linguagem de negócio", "1 página máximo"] },
   { id: "apresentacao-lm", emoji: "🏢", label: "Apresentação à LM", freq: "Quinzenal (alterna c/ W Brain)", tagColor: "#6B3A8A", summary: "SDM apresenta resultados padronizados à LM.", items: ["Métricas por squad + diagnósticos proativos + ROI", "Artefatos padronizados", "NUNCA expor SM individualmente"] },
-  { id: "municao", emoji: "🎯", label: "Munição para o Promotor", freq: "Mensal · 1 página", tagColor: "#9E3D2B", summary: "Destilação do mês. Gerente Promotor usa direto com a CTO.", items: ["Headline + painel + 3 entregas + 1 risco + ROI", "Se o Promotor não entender em 2 min, está longo demais"] },
+  { id: "municao", emoji: "🎯", label: "Apresentação para CTO", freq: "Mensal · 1 página", tagColor: "#9E3D2B", summary: "Destilação do mês para apresentação direta à CTO.", items: ["Headline + painel + 3 entregas + 1 risco + ROI", "Se a CTO não entender em 2 min, está longo demais"] },
 ];
