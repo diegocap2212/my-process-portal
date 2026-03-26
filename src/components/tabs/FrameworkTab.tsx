@@ -55,7 +55,7 @@ const FrameworkTab: React.FC<FrameworkTabProps> = ({ setTab, setExp }) => {
             Ciclo de <em style={{ fontStyle: "italic", color: "#c9a84c" }}>Cadência</em>
           </div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", lineHeight: 1.6, maxWidth: 480 }}>
-            Um report alimenta tudo. O SM preenche uma vez por semana — o sistema distribui para sync, report pro G, apresentação à LM e munição pro Promotor.
+            Um report alimenta tudo. O SM preenche uma vez por semana — o sistema distribui para sync, report para Lucas, apresentação à LM e apresentação para CTO.
           </div>
         </div>
       </div>
@@ -251,7 +251,7 @@ const FrameworkTab: React.FC<FrameworkTabProps> = ({ setTab, setExp }) => {
           background: "linear-gradient(to bottom, #c9a84c, transparent)"
         }} />
         <div style={{ ...fontSerif, fontSize: 13, fontWeight: 300, lineHeight: 1.7, color: "rgba(255,255,255,.6)", fontStyle: "italic", paddingLeft: 12 }}>
-          "O report semanal do SM alimenta tudo: sync, report pro G, apresentação à LM, munição pro Promotor. Um preenchimento por semana — o sistema distribui."
+          "O report semanal do SM alimenta tudo: sync, report para Lucas, apresentação à LM, apresentação para CTO. Um preenchimento por semana — o sistema distribui."
         </div>
       </div>
     </div>

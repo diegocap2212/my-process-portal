@@ -37,7 +37,7 @@ export default function WoWV2() {
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", height: 56, gap: 16 }}>
           <div style={{ ...fontSerif, fontSize: 20, color: "#111827", cursor: "pointer" }} onClick={() => { setTab("framework"); }}>
-            Dashboard de Métricas <span style={{ color: "#6366f1", fontWeight: 700 }}>LM</span>
+            Ways of Working <span style={{ color: "#6366f1", fontWeight: 700 }}>Venice</span>
           </div>
           <div style={{ flex: 1 }} />
           <div
