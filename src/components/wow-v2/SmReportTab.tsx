@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { fontSerif, fontMono, labelStyle, inputStyle } from "@/styles/constants";
+import { fontMono } from "@/styles/constants";
 import { SM_NAMES, SM_SQUAD_DETAILS, smColors } from "@/data/squads";
 
 import ConeStatus from "./ConeStatus";
@@ -17,18 +17,19 @@ const SmReportTab: React.FC = () => {
   return (
     <div>
       {/* SM Selector */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         {SM_NAMES.map((sm) => (
           <div
             key={sm}
             onClick={() => setSelectedSm(sm)}
             style={{
-              padding: "6px 14px",
-              fontSize: 11,
+              padding: "8px 18px",
+              fontSize: 13,
               fontWeight: selectedSm === sm ? 600 : 400,
-              color: selectedSm === sm ? "#fff" : "rgba(26,29,35,.5)",
-              background: selectedSm === sm ? smColors[sm] : "transparent",
-              border: `1px solid ${selectedSm === sm ? smColors[sm] : "#e0dcd7"}`,
+              color: selectedSm === sm ? "#fff" : "#6b7280",
+              background: selectedSm === sm ? "#6366f1" : "#fff",
+              border: `1px solid ${selectedSm === sm ? "#6366f1" : "#e5e7eb"}`,
+              borderRadius: 8,
               cursor: "pointer",
               fontFamily: "'DM Sans',sans-serif",
               transition: "all .2s",
@@ -41,40 +42,46 @@ const SmReportTab: React.FC = () => {
 
       {/* Week indicator */}
       <div style={{
-        display: "flex", alignItems: "center", marginBottom: 16,
+        display: "flex", alignItems: "center", marginBottom: 20,
+        padding: "8px 14px", background: "#f9fafb", borderRadius: 8,
+        border: "1px solid #e5e7eb",
       }}>
         <div style={{
-          ...fontMono, fontSize: 9, color: "rgba(26,29,35,.4)",
+          fontSize: 12, color: "#6b7280",
           display: "flex", alignItems: "center", gap: 8,
+          fontFamily: "'DM Sans',sans-serif",
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: isLive ? "#2A6B50" : "#c9a84c" }} />
-          SEMANA {week} {isLive ? "· DADOS REAIS" : "· MOCK"}
+          <span style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: isLive ? "#059669" : "#d97706",
+          }} />
+          Semana {week} {isLive ? "· Dados reais" : "· Mock"}
         </div>
       </div>
 
-      {/* Métricas do Cone por Squad */}
-      <div style={{ ...labelStyle, color: "#7B5EA7", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={{ width: 12, height: 1, background: "#7B5EA7" }} />Métricas do Cone · Automático
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
+      {/* Squads */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {Object.entries(smData).map(([squad, data]) => (
-          <div key={squad} style={{ background: "#fff", border: "1px solid #e0dcd7" }}>
+          <div key={squad} style={{
+            background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 1px 3px rgba(0,0,0,.04)",
+          }}>
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "10px 14px", borderBottom: "1px solid #e0dcd7", background: "#faf9f7",
+              padding: "14px 20px", borderBottom: "1px solid #e5e7eb", background: "#f9fafb",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1d23", fontFamily: "'DM Sans',sans-serif" }}>{squad}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#111827", fontFamily: "'DM Sans',sans-serif" }}>{squad}</span>
                 {SM_SQUAD_DETAILS[selectedSm]?.find(s => s.name === squad)?.description && (
-                  <span style={{ ...fontMono, fontSize: 8, color: "rgba(26,29,35,.35)" }}>
+                  <span style={{ fontSize: 12, color: "#9ca3af" }}>
                     {SM_SQUAD_DETAILS[selectedSm].find(s => s.name === squad)!.description}
                   </span>
                 )}
               </div>
               <ConeStatus status={data.cone} />
             </div>
-            <div style={{ padding: "12px" }}>
+            <div style={{ padding: "20px" }}>
               <SquadDashboard rawItems={rawItems} squadName={squad} sm={selectedSm} accent={smColors[selectedSm]} />
             </div>
           </div>
