@@ -1,31 +1,27 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fontSerif, fontMono } from "@/styles/constants";
-import FrameworkTab from "@/components/tabs/FrameworkTab";
-import CadenciasTab from "@/components/tabs/CadenciasTab";
-import PapelTab from "@/components/tabs/PapelTab";
-import PadroesTab from "@/components/tabs/PadroesTab";
+import SmReportTab from "@/components/wow-v2/SmReportTab";
+import SdmTab from "@/components/wow-v2/SdmTab";
+import HistoricoTab from "@/components/wow-v2/HistoricoTab";
 
-const SUB_TABS = [
-  { id: "framework", label: "Framework", icon: "◯" },
-  { id: "cadencias", label: "Cadências", icon: "↻" },
-  { id: "papel", label: "Papel", icon: "◎" },
-  { id: "padroes", label: "Padrões", icon: "◆" },
+const TABS = [
+  { id: "report", label: "Report SM", icon: "◉" },
+  { id: "sdm", label: "Visão SDM", icon: "◎" },
+  { id: "historico", label: "Histórico", icon: "↻" },
 ];
 
 const PAGE_META: Record<string, { title: string; desc: string }> = {
-  framework: { title: "Ciclo de Cadência", desc: "Visualização do ciclo completo de cadências da torre" },
-  cadencias: { title: "Cadências", desc: "Todas as cadências do SM e SDM em detalhe" },
-  papel: { title: "Papel & Regras", desc: "O que o SM faz, não faz, anti-padrões e a tríade" },
-  padroes: { title: "Padrões & Métricas", desc: "DoR, DoD, métricas obrigatórias e proteção baseada em fatos" },
+  report: { title: "Report Semanal", desc: "Métricas do cone automáticas + perguntas qualitativas · Preenchimento semanal (sexta)" },
+  sdm: { title: "Visão Consolidada", desc: "Consolidação da torre para o sync de segunda · Métricas + contexto qualitativo" },
+  historico: { title: "Histórico de Reports", desc: "Timeline de todos os reports semanais enviados" },
 };
 
-export default function WoWV2() {
+export default function Reports() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("framework");
-  const [exp, setExp] = useState<string | null>(null);
+  const [tab, setTab] = useState("report");
 
-  const meta = PAGE_META[tab] || PAGE_META.framework;
+  const meta = PAGE_META[tab] || PAGE_META.report;
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8f9fc" }}>
@@ -36,26 +32,29 @@ export default function WoWV2() {
         boxShadow: "0 1px 3px rgba(0,0,0,.04)",
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", height: 56, gap: 16 }}>
-          <div style={{ ...fontSerif, fontSize: 20, color: "#111827", cursor: "pointer" }} onClick={() => { setTab("framework"); }}>
+          <div
+            style={{ ...fontSerif, fontSize: 20, color: "#111827", cursor: "pointer" }}
+            onClick={() => navigate("/")}
+          >
             Dashboard de Métricas <span style={{ color: "#6366f1", fontWeight: 700 }}>LM</span>
           </div>
           <div style={{ flex: 1 }} />
           <div
-            onClick={() => navigate("/reports")}
+            onClick={() => navigate("/")}
             style={{
               fontSize: 13, fontWeight: 500, padding: "6px 16px",
-              background: "#6366f1", color: "#fff", borderRadius: 8,
+              background: "#f3f4f6", color: "#374151", borderRadius: 8,
               cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
-              transition: "background .2s",
+              border: "1px solid #e5e7eb",
             }}
           >
-            📊 Reports
+            ◯ Framework
           </div>
         </div>
 
         {/* Sub-tabs */}
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", gap: 4 }}>
-          {SUB_TABS.map((t) => (
+          {TABS.map((t) => (
             <div
               key={t.id}
               onClick={() => setTab(t.id)}
@@ -89,10 +88,9 @@ export default function WoWV2() {
           </div>
         </div>
 
-        {tab === "framework" && <FrameworkTab setTab={setTab} setExp={setExp} />}
-        {tab === "cadencias" && <CadenciasTab exp={exp} setExp={setExp} />}
-        {tab === "papel" && <PapelTab />}
-        {tab === "padroes" && <PadroesTab />}
+        {tab === "report" && <SmReportTab />}
+        {tab === "sdm" && <SdmTab />}
+        {tab === "historico" && <HistoricoTab />}
       </div>
     </div>
   );
