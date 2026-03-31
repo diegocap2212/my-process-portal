@@ -96,10 +96,7 @@ export function useSquadDashboard(
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
-    // If no team mapping matches actual data, use all items (data has Team="UP" or "")
-    const squadItems = teams.length > 0 && rawItems.some((item) => teams.includes(item.Team))
-      ? rawItems.filter((item) => teams.includes(item.Team))
-      : rawItems;
+    const squadItems = rawItems.filter((item) => teams.includes(item.Team));
 
     // Releases
     const releases = Array.from(
