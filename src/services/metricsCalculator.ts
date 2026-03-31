@@ -67,6 +67,8 @@ export function formatWeekRange(monday: Date): string {
 
 // Team name from Jira → { sm, squad }
 export const JIRA_TEAM_TO_SQUAD: Record<string, { sm: string; squad: string }> = {
+  UP: { sm: "Edmilson", squad: "Scania" },
+  "": { sm: "Edmilson", squad: "Scania" },
   "SCANIA S 650": { sm: "Edmilson", squad: "Scania" },
   TAOS: { sm: "Gabriela", squad: "TAOS" },
   GOL: { sm: "Gabriela", squad: "GOL" },
