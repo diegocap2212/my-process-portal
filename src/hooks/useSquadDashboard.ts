@@ -46,22 +46,29 @@ function getMon(d: Date): Date {
 
 function excelToJSDate(dateStr: string | null): Date | null {
   if (!dateStr) return null;
-  if (typeof dateStr === "string" && dateStr.includes("-")) return new Date(dateStr);
 
-  // dd/MM/yyyy HH:mm
-  const brMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
-  if (brMatch) {
-    const [, dd, mm, yyyy, hh, min] = brMatch;
-    return new Date(+yyyy, +mm - 1, +dd, +hh, +min);
+  // ISO format with dash
+  if (typeof dateStr === "string" && dateStr.includes("-")) {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
   }
 
-  // dd/MM/yyyy
-  const brDateOnly = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (brDateOnly) {
-    const [, dd, mm, yyyy] = brDateOnly;
-    return new Date(+yyyy, +mm - 1, +dd);
+  // Slash-based: M/D/YY H:mm, MM/DD/YYYY, DD/MM/YYYY
+  const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{1,2}))?$/);
+  if (slashMatch) {
+    let [, p1, p2, p3, hh, min] = slashMatch;
+    let year = +p3;
+    if (year < 100) year += 2000;
+    let month: number, day: number;
+    if (+p1 > 12) {
+      day = +p1; month = +p2 - 1;
+    } else {
+      month = +p1 - 1; day = +p2;
+    }
+    return new Date(year, month, day, +(hh || 0), +(min || 0));
   }
 
+  // Excel serial
   const excelDate = parseFloat(String(dateStr));
   if (isNaN(excelDate)) return null;
   return new Date((excelDate - 25569) * 86400 * 1000);
@@ -96,7 +103,9 @@ export function useSquadDashboard(
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
-    const squadItems = rawItems.filter((item) => teams.includes(item.Team));
+    const teamFiltered = rawItems.filter((item) => teams.includes(item.Team));
+    // Fallback: if team mapping yields nothing, use all rawItems
+    const squadItems = teamFiltered.length > 0 ? teamFiltered : rawItems;
 
     // Releases
     const releases = Array.from(
