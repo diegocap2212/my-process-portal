@@ -103,7 +103,9 @@ export function useSquadDashboard(
 ): SquadDashboardData {
   return useMemo(() => {
     const teams = getSquadTeams(squadName, sm);
-    const squadItems = rawItems.filter((item) => teams.includes(item.Team));
+    const teamFiltered = rawItems.filter((item) => teams.includes(item.Team));
+    // Fallback: if team mapping yields nothing, use all rawItems
+    const squadItems = teamFiltered.length > 0 ? teamFiltered : rawItems;
 
     // Releases
     const releases = Array.from(
