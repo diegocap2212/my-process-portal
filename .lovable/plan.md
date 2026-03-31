@@ -1,45 +1,43 @@
 
 
-## Plano: Alinhar cálculos do portal com o dashboard Vercel (repo público)
+## Plano: Corrigir gráficos vazios — mapeamento de times desatualizado
 
-### Diferenças encontradas (código-fonte comparado)
+### Problema raiz
 
-Analisei o `useDashboardData.ts` do repo público e comparei com o `useSquadDashboard.ts` do portal. As divergências:
+Os gráficos não aparecem porque o mapeamento `JIRA_TEAM_TO_SQUAD` no portal está desatualizado em relação aos dados reais.
 
-| Aspecto | Vercel (correto) | Portal (atual) | Impacto |
-|---------|------------------|----------------|---------|
-| **Cone: melhor/pior cenário** | Fixo: 3 itens/sem (melhor), 1 item/sem (pior) | velocity*1.5 (melhor), velocity*0.5 (pior) | Projeções diferentes |
-| **Cone: tendência** | `velocity = totalEntregas / semanasDesdeFirstEntrega` | Igual | OK |
-| **Burndown scope** | Inclui DESCARTADO no scope | Exclui DESCARTADO do scope | "A Fazer" menor no portal |
-| **Label da semana** | Range: "13/01 - 19/01" | Só segunda: "13/01" | Visual diferente |
-| **Parsing Excel** | `(serial - 25569) * 86400000` | `epoch(1899,11,30) + serial * 86400000` | Equivalente, OK |
-| **Throughput/Planejadas** | Mesma lógica | Mesma lógica | OK |
+**Dados reais** (vindos do data.json): os itens têm `Team: "UP"` ou `Team: ""` (vazio).
 
-### O que será alterado
+**Mapeamento atual no portal**: espera `"SCANIA S 650"`, `"TAOS"`, `"GOL"`, `"NIVUS"`, `"OPTIMUS"`.
+
+Como nenhum item no data.json tem esses nomes de time, o filtro `squadItems = rawItems.filter(item => teams.includes(item.Team))` retorna **array vazio** para todos os squads, resultando em gráficos sem dados.
+
+### Pergunta antes de implementar
+
+Preciso entender como os dados estão organizados agora. Pelo que vejo no data.json, praticamente todos os itens têm `Team: "UP"` ou vazio. O dashboard Vercel permite filtrar por "Team" como um dropdown simples.
+
+**Opções para alinhar:**
+
+1. **Filtrar por Release** em vez de Team — cada release (O4R1, O4R2) pode ser associada a um SM/squad
+2. **Atualizar o mapeamento** — se os times mudaram de nome no Jira, atualizar `JIRA_TEAM_TO_SQUAD` para incluir `"UP"` e outros nomes atuais
+3. **Remover a separação por squad** e mostrar todos os itens como o Vercel faz, filtrando apenas por Team/Release via dropdown
+
+### Mudanças necessárias (após decisão)
 
 | Arquivo | Mudança |
 |---------|---------|
-| `src/hooks/useSquadDashboard.ts` | (1) Cone com 3/1 fixos. (2) Incluir DESCARTADO no scope do burndown. (3) Labels em formato range "dd/MM - dd/MM" |
-| `src/services/metricsCalculator.ts` | Adicionar função `formatWeekRange` para gerar label no formato "dd/MM - dd/MM" |
+| `src/services/metricsCalculator.ts` | Atualizar `JIRA_TEAM_TO_SQUAD` com os nomes de team corretos |
+| `src/hooks/useSquadDashboard.ts` | Ajustar filtro se lógica de agrupamento mudar |
+| `src/data/squads.ts` | Atualizar `SM_SQUAD_DETAILS` se squads/nomes mudarem |
 
-### Detalhes técnicos
+### Detalhe técnico
 
-**Cone (alinhar com Vercel)**:
-```
-melhorCenario = currentAFazer - i * 3
-piorCenario = currentAFazer - i * 1
-tendencia = currentAFazer - i * velocity  (mantém)
-```
-
-**Burndown scope (alinhar com Vercel)**:
-```
-// Remover filtro de DESCARTADO do scope
-scopeAtWeek = parsed.filter(i => i.createdDate && i.createdDate < weekEnd).length
-// (sem && i.Status !== "DESCARTADO")
+O fluxo atual:
+```text
+data.json → Edge Function → rawItems (Team="UP") 
+  → getSquadTeams("Scania","Edmilson") → busca "SCANIA S 650" 
+  → match: ZERO → gráficos vazios
 ```
 
-**Labels**:
-```
-formatWeekRange(date) => "13/01 - 19/01"
-```
+O fix precisa alinhar o que `getSquadTeams` procura com o que realmente vem no campo `Team` dos dados.
 
