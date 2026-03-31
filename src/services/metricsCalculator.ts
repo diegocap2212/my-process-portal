@@ -20,18 +20,26 @@ export function excelSerialToDate(serial: number): Date {
 export function parseExcelDate(val: string | null): Date | null {
   if (!val) return null;
 
-  // Try "dd/MM/yyyy HH:mm" format first
-  const brMatch = val.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
-  if (brMatch) {
-    const [, dd, mm, yyyy, hh, min] = brMatch;
-    return new Date(+yyyy, +mm - 1, +dd, +hh, +min);
+  // ISO format with dash
+  if (typeof val === "string" && val.includes("-")) {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
   }
 
-  // Try "dd/MM/yyyy" without time
-  const brDateOnly = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (brDateOnly) {
-    const [, dd, mm, yyyy] = brDateOnly;
-    return new Date(+yyyy, +mm - 1, +dd);
+  // Slash-based date formats: M/D/YY, MM/DD/YYYY, DD/MM/YYYY
+  const slashMatch = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{1,2}))?$/);
+  if (slashMatch) {
+    let [, p1, p2, p3, hh, min] = slashMatch;
+    let year = +p3;
+    if (year < 100) year += 2000;
+    // If first part > 12, it's DD/MM format; otherwise M/D (Jira Cloud default)
+    let month: number, day: number;
+    if (+p1 > 12) {
+      day = +p1; month = +p2 - 1;
+    } else {
+      month = +p1 - 1; day = +p2;
+    }
+    return new Date(year, month, day, +(hh || 0), +(min || 0));
   }
 
   // Fallback: Excel serial number
